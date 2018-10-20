@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include "UCS.h"
 #include "TIDriver/ucs.h" 
+#include "Freq.h"
 #define UCBxCTL0 UCB0CTL0
 #define UCBxCTL1 UCB0CTL1
 #define UCBxBRW UCB0BRW
@@ -113,6 +114,7 @@ bool i2c_send_master(uint8_t address,uint8_t cmd,uint8_t data,int8_t fail_count)
 
 int main(){
     WDTCTL = WDTPW | WDTHOLD;	// stop watchdog timer
+    setupDCO();
     i2c_master_init();
     while(1){
     	i2c_send_master(0x3c,0xff,0xff);
