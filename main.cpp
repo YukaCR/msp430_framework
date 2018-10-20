@@ -19,7 +19,7 @@
 #define UCBxRXBUF UCB0RXBUF
 #define UCBxI2COA UCB0I2COA
 #define UCBxICTL UCB0ICTL
-#define max_fail_loop 1000
+#define max_fail_loop 800000
 
 uint16_t fail_loop=0;
 
@@ -96,6 +96,9 @@ void i2c_stop_master(){
     UCBxCTL0 |= UCSWRST;
 }
 bool i2c_send_master(uint8_t address,uint8_t cmd,uint8_t data,int8_t fail_count){
+	//cooldownDCO();
+	UCS_initClockSignal(UCS_MCLK,UCS_XT2CLK_SELECT,UCS_CLOCK_DIVIDER_1);
+
 	if(fail_count<0){
 		return false;
 	}
@@ -109,12 +112,16 @@ bool i2c_send_master(uint8_t address,uint8_t cmd,uint8_t data,int8_t fail_count)
         return i2c_send_master(address,cmd,data,fail_count - 1);
     };
     i2c_stop_master();
+    UCS_initClockSignal(UCS_MCLK,UCS_DCOCLK_SELECT,UCS_CLOCK_DIVIDER_1);
+    //burnDCO();
     return true;
 }
 
 int main(){
     WDTCTL = WDTPW | WDTHOLD;	// stop watchdog timer
-    setupDCO();
+    burnDCO();
+    P2DIR |= BIT2;                            // SMCLK set out to pins
+    P2SEL |= BIT2;
     i2c_master_init();
     while(1){
     	i2c_send_master(0x3c,0xff,0xff);

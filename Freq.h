@@ -23,7 +23,8 @@ double Nx_DB;
 /**
  * main.c
  */
-void setupDCO(void);
+void burnDCO(void);
+void cooldownDCO(void);
 void SetVCoreUp (unsigned int level);
 inline void _freq_start();
 inline void enableN0Counter();
@@ -83,7 +84,7 @@ int _freq_main(void)
 	P5SEL |= BIT4 + BIT5;
 	P5SEL |= BIT2 + BIT3; 
 	P3SEL |= BIT0 + BIT1;
-	   setupDCO();								//Fuck you TI , up to 34Mhz
+	   burnDCO();								//Fuck you TI , up to 34Mhz
     UCS_setExternalClockSource(32768,4*Mhz);
     UCS_turnOnXT2(UCS_XT2_DRIVE_4MHZ_8MHZ);
     UCS_turnOnLFXT1(UCS_XT1_DRIVE_0,UCS_XCAP_3);
@@ -176,7 +177,37 @@ interrupt void P2_ISR(){
  * FUCK TI.SO SLOW 
  * https://e2e.ti.com/support/microcontrollers/msp430/f/166/t/145592?MSP430F5529-Clock-Configuration-for-25Mhz
  */
-void setupDCO(void)
+void cooldownDCO(){
+
+
+    /* Power settings */
+    //SetVCoreUp(1u);
+    //SetVCoreUp(2u);
+    //SetVCoreUp(3u);
+    //SetVCoreUp(4u);
+    //SetVCoreUp(5u);
+
+
+    UCSCTL3 = SELREF__REFOCLK;    // select REFO as FLL source
+    //UCSCTL6 = XT1OFF | XT2OFF;    // turn off XT1 and XT2
+
+    /* Initialize DCO to 25.00MHz */
+    __bis_SR_register(SCG0);                  // Disable the FLL control loop
+    UCSCTL0 = 0x0000u;                        // Set lowest possible DCOx, MODx
+    UCSCTL1 = DCORSEL_6;                      // Set RSELx for DCO = 50 MHz
+    UCSCTL2 = 762u;                            // Set DCO Multiplier for 33.78MHz
+                                              // (N + 1) * FLLRef = Fdco
+                                              // (762 + 1) * 32768 = 33.78MHz
+    //UCSCTL4 = SELA__REFOCLK | SELS__DCOCLK | SELM__DCOCLK;
+    __bic_SR_register(SCG0);                  // Enable the FLL control loop
+
+    // Worst-case settling time for the DCO when the DCO range bits have been
+    // changed is n x 32 x 32 x f_MCLK / f_FLL_reference. See UCS chapter in 5xx
+    // UG for optimization.
+    // 32*32*25MHz/32768Hz = 781250 = MCLK cycles for DCO to settle
+    __delay_cycles(781250u);
+}
+void burnDCO(void)
 {
 
       /* Power settings */
@@ -204,7 +235,7 @@ void setupDCO(void)
       // changed is n x 32 x 32 x f_MCLK / f_FLL_reference. See UCS chapter in 5xx
       // UG for optimization.
       // 32*32*25MHz/32768Hz = 781250 = MCLK cycles for DCO to settle
-      __delay_cycles(781250u);
+      __delay_cycles(1062500u);
 
 
       /* Loop until XT1,XT2 & DCO fault flag is cleared */
