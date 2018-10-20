@@ -1,3 +1,8 @@
+/*
+*	use P1_3 P2_3 as counter port
+*	1.698Mhz 1%
+*/
+
 #include <msp430.h> 
 #include <stdint.h>
 #include <math.h>
@@ -20,6 +25,21 @@ double Nx_DB;
  */
 void setupDCO(void);
 void SetVCoreUp (unsigned int level);
+inline void _freq_start();
+inline void enableN0Counter();
+inline void enableGateCounter();
+inline void disableGateCounter();
+inline void disableN0Counter();
+inline void enableNxCounter();
+inline void disableNxCounter();
+inline void disableProcessInterrupt();
+inline void enableProcessInterrupt();
+int _freq_main(void);
+inline void _freq_start();
+void _freq_end();
+
+
+
 inline void enableN0Counter(){
 	TA0CTL = TASSEL_2 + ID_0 + MC_2 + TAIE + TACLR;//SMCLK AT 4MHZ
 }
