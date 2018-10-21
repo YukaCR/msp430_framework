@@ -2,7 +2,8 @@
 *	use P1_3 P2_3 as counter port
 *	1.698Mhz 1%
 */
-
+#ifndef __FREQ_H__
+#define __FREQ_H__
 #include <msp430.h> 
 #include <stdint.h>
 #include <math.h>
@@ -19,6 +20,7 @@ uint32_t Fuckyou_TI = 0;
 bool Gate = 1 ,SoftwareGat = 0,startflag = 0;
 uint32_t N0Result = 0,NxCount = 0,NxResult = 0;
 uint16_t N0loop = 0,N0RWS = 0;
+bool low_freq = false,low_start=false;
 double Nx_DB;
 /**
  * main.c
@@ -35,14 +37,16 @@ inline void enableNxCounter();
 inline void disableNxCounter();
 inline void disableProcessInterrupt();
 inline void enableProcessInterrupt();
-int _freq_main(void);
+void _freq_main(void);
 inline void _freq_start();
 void _freq_end();
-
-
+void(*_freq_callback)(double);
+inline void _freq_SetCallback(void(*_callback)(double)){
+	_freq_callback = _callback;
+}
 
 inline void enableN0Counter(){
-	TA0CTL = TASSEL_2 + ID_0 + MC_2 + TAIE + TACLR;//SMCLK AT 4MHZ
+	TA0CTL = (low_freq?TASSEL_1:TASSEL_2) + ID_0 + MC_2 + TAIE + TACLR;//SMCLK AT 4MHZ
 }
 inline void enableGateCounter(){
 	//TA1R = 32768;
@@ -53,10 +57,10 @@ inline void disableGateCounter(){
 	TA1CTL = 0X00;
 }
 inline void disableN0Counter(){
-	TA0CTL = 0X00;
+	TA0CTL &=~ TAIE;
 }
 inline void enableNxCounter(){
-	P2OUT|=BIT3;
+	//P2OUT|=BIT3;
 	P2IE|=BIT3;
 }
 inline void disableNxCounter(){
@@ -66,10 +70,10 @@ inline void disableProcessInterrupt(){
 	P1IE = 0X00;
 }
 inline void enableProcessInterrupt(){
-	P1OUT|=BIT3;
+	//P1OUT|=BIT3;
 	P1IE|=BIT3;
 }
-int _freq_main(void)
+void _freq_init(void)
 {
 	WDTCTL = WDTPW | WDTHOLD;	// stop watchdog timer
 	__enable_interrupt();
@@ -95,28 +99,46 @@ int _freq_main(void)
     UCS_initClockSignal(UCS_MCLK,UCS_DCOCLK_SELECT,UCS_CLOCK_DIVIDER_1);
 
 	__delay_cycles(1000);
-	_freq_start();
-	/*TIMER A0*/
-	while(1){
-		continue;
-	}
-	return 0;
+	//_freq_start();
 }
 //functions
 inline void _freq_start(){
+    UCS_initClockSignal(UCS_ACLK,UCS_XT1CLK_SELECT,UCS_CLOCK_DIVIDER_1);
+    UCS_initClockSignal(UCS_SMCLK,UCS_XT2CLK_SELECT,UCS_CLOCK_DIVIDER_1);
+    UCS_initClockSignal(UCS_MCLK,UCS_DCOCLK_SELECT,UCS_CLOCK_DIVIDER_1);
 	Gate = 0;
 	startflag = 1;
+	N0Result = 0;NxCount = 0;NxResult = 0;
+	N0loop = 0;N0RWS = 0;
 	enableProcessInterrupt();
 	disableNxCounter();
 	enableGateCounter();
 }
 void _freq_end(){
+	double f0;
+	if(low_freq){
+		f0 = 32768;
+	}
+	else{
+		f0 = 4000000;
+	}
 	N0Result = N0loop;
 	N0Result <<= 16;
 	N0Result |= TA0R;
-	Nx_DB = ((double)NxCount * (double)4000000)/ (double)N0Result;
-	_nop();
-	_nop();
+	Nx_DB = ((double)NxCount * f0)/ (double)N0Result;
+	if(Nx_DB < 200){
+		low_freq = true;
+		Nx_DB -= 12;
+		TA0CTL &=~ TASSEL_3;
+		TA0CTL |= TASSEL_1;
+	}
+	else{
+		low_freq = false;
+		TA0CTL &=~ TASSEL_3;
+		TA0CTL |= TASSEL_2;
+		Nx_DB -= 7;
+	}
+	_freq_callback(Nx_DB);
 }
 //FUCK YOU TI!
 
@@ -129,6 +151,10 @@ interrupt void T1A1_ISR(){
 	disableGateCounter();
 	disableNxCounter();
 	enableProcessInterrupt();
+	if(NxCount == 0){
+		disableProcessInterrupt();
+		_freq_callback(0);
+	}
 	//Fuckyou_TI ++;//32768hz / 32768 , TEST 5S
 	//if(Fuckyou_TI > 5){
 	//	TA0CTL &=~ TAIE;
@@ -151,17 +177,41 @@ interrupt void P1_ISR(){
 	P1IFG = 0X00;
 	//Fuckyou_TI ++;
 	NxCount++;
-	disableProcessInterrupt();
-	if(Gate){//Gate = 1, SWGate = 0 not make sense.
-		N0RWS = TA0R;
-		disableN0Counter();
-		disableNxCounter();
-		_freq_end();
+
+	if(low_freq){
+		if(Gate){
+			disableProcessInterrupt();
+			N0RWS = TA0R;
+			disableN0Counter();
+			disableNxCounter();
+			_freq_end();
+		}
+		else if(startflag){
+			enableN0Counter();
+			startflag = 0;
+		}
+		else {
+			__delay_cycles(100);
+			if(!(P1IN&BIT3)){
+				NxCount --;
+			}
+		}
 	}
-	else if(startflag){
-		enableNxCounter();
-		enableN0Counter();
-		startflag = 0;
+	else{
+
+		if(Gate){//Gate = 1, SWGate = 0 not make sense.
+			disableProcessInterrupt();
+				N0RWS = TA0R;
+				disableN0Counter();
+				disableNxCounter();
+				_freq_end();
+		}
+			else if(startflag){
+				disableProcessInterrupt();
+				enableNxCounter();
+				enableN0Counter();
+			startflag = 0;
+		}
 	}
 	//if(Fuckyou_TI>10000){ //1KHZ TEST FOR 10S
 	//	P1IE &=~ BIT3;
@@ -272,3 +322,4 @@ void SetVCoreUp (unsigned int level)
     // Lock PMM registers for write access
     PMMCTL0_H = 0x00;
 }
+#endif

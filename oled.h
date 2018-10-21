@@ -1,3 +1,5 @@
+#ifndef __OLED_H__
+#define __OLED_H__
 #include "i2c.h"
 #include "oledfont.h"
 #include "string.h"
@@ -102,17 +104,17 @@ void OLED_init(){
 }
 
 char *itoa( int num, char *str, int radix )
-{                                       /*绱㈠紩琛�*/
+{                                       /*缁便垹绱╃悰锟�*/
 	char		index[] = "0123456789ABCDEF";
-	unsigned	unum;           /*涓棿鍙橀噺*/
+	unsigned	unum;           /*娑擃參妫块崣姗�鍣�*/
 	int		i = 0, j, k;
-/*纭畾unum鐨勫��*/
-	if ( radix == 10 && num < 0 )   /*鍗佽繘鍒惰礋鏁�*/
+/*绾喖鐣緐num閻ㄥ嫬锟斤拷*/
+	if ( radix == 10 && num < 0 )   /*閸椾浇绻橀崚鎯扮閺侊拷*/
 	{
 		unum		= (unsigned) -num;
 		str[i++]	= '-';
-	}else unum = (unsigned) num;    /*鍏朵粬鎯呭喌*/
-/*杞崲*/
+	}else unum = (unsigned) num;    /*閸忔湹绮幆鍛枌*/
+/*鏉烆剚宕�*/
 	do
 	{
 		str[i++]	= index[unum % (unsigned) radix];
@@ -120,9 +122,9 @@ char *itoa( int num, char *str, int radix )
 	}
 	while ( unum );
 	str[i] = '\0';
-/*閫嗗簭*/
+/*闁棗绨�*/
 	if ( str[0] == '-' )
-		k = 1;  /*+杩涘埗-鏁�*/
+		k = 1;  /*+鏉╂稑鍩�-閺侊拷*/
 	else k = 0;
 	char temp;
 	for ( j = k; j <= (i - 1) / 2; j++ )
@@ -133,3 +135,4 @@ char *itoa( int num, char *str, int radix )
 	}
 	return(str);
 }
+#endif

@@ -1,3 +1,5 @@
+#ifndef __I2C_H__
+#define __I2C_H__
 #ifdef VS_CODE
 #define uint32_t unsigned long
 #define uint16_t unsigned int
@@ -174,3 +176,4 @@ bool i2c_write_data(uint8_t address,uint8_t data,int8_t fail_count){
     UCS_initClockSignal(UCS_MCLK,UCS_DCOCLK_SELECT,UCS_CLOCK_DIVIDER_1);
     return true;
 }
+#endif
