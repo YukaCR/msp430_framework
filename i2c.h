@@ -10,6 +10,7 @@
 #include "UCS.h"
 #include "TIDriver/ucs.h" 
 #include "Freq.h"
+#define UCBx 0           //UCB0 UCB1
 #define UCBxCTL0 UCB0CTL0
 #define UCBxCTL1 UCB0CTL1
 #define UCBxBRW UCB0BRW
@@ -49,7 +50,9 @@ void i2c_master_reset(){
 void i2c_master_init(){
 	P5SEL |= BIT4 + BIT5;
 	P5SEL |= BIT2 + BIT3;
+    #if UCBx == 0
     P3SEL |= BIT0 + BIT1;
+    #endif
    UCS_setExternalClockSource(32768,4*Mhz);
    UCS_turnOnXT2(UCS_XT2_DRIVE_4MHZ_8MHZ);
    __delay_cycles(1000);

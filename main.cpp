@@ -1,94 +1,103 @@
 //USCI_A_API
 #include <msp430.h>
-#include "TIDriver/usci_a_spi.h"
+#include "ucs.h"
 #include "TIDriver/ucs.h"
 #define Mhz 1000000L
 #define Khz 1000L
-USCI_A_SPI_initMasterParam usci_spi_param;
-void UCAxSPI_init(bool Low_enable,bool msb_first,uint32_t speed){
+#define UCAx 0
+#define KPH 1
+#define SS_PORT P6OUT
+#define SS_PIN BIT6
+#define UCAxCTL0 UCA0CTL0
+#define UCAxCTL1 UCA0CTL1
+#define UCAxBRW UCA0BRW
+#define UCAxTXBUF UCA0TXBUF
+#define UCAxIFG UCA0IFG
+//KPH KPL DATA1
+// 0   0  Send on raise. first and last bit lost
+// 0   1  Send on falldown. data not prepare ok.
+// 1   0  Send on raise. looks great.
+// 1   1  Send on falldown. looks great.
+//raise send : 1 0 or 0 1
+//falldown send: 0 0 or 1 1
+//recommand KPH = 1
+bool SS_LOW_ENABLE = true;
+bool msbfirst;
+void UCAxSPI_master_init(void msb_first,uint32_t speed,void raise){
     UCS_setExternalClockSource(32768,4*Mhz);
     UCS_turnOnXT2(UCS_CLOCK_DIVIDER_1);
     UCS_initClockSignal(UCS_SMCLK,UCS_XT2CLK_SELECT,UCS_CLOCK_DIVIDER_1);
-    usci_spi_param.selectClockSource = USCI_A_SPI_CLOCKSOURCE_SMCLK;
-    usci_spi_param.clockSourceFrequency = UCS_getSMCLK();
-    usci_spi_param.clockPhase = Low_enable?USCI_A_SPI_PHASE_DATA_CHANGED_ONFIRST_CAPTURED_ON_NEXT:USCI_A_SPI_PHASE_DATA_CAPTURED_ONFIRST_CHANGED_ON_NEXT;
-    usci_spi_param.clockPolarity = USCI_A_SPI_CLOCKPOLARITY_INACTIVITY_LOW;
-    usci_spi_param.msbFirst = msb_first?USCI_A_SPI_MSB_FIRST:USCI_A_SPI_LSB_FIRST;
-    usci_spi_param.desiredSpiClock = speed;
-    USCI_A_SPI_initMaster(USCI_A0_BASE,&usci_spi_param);
-    USCI_A_SPI_enable(USCI_A0_BASE);
-    __delay_cycles(1000);
-}
-void SetVCoreUp (unsigned int level)
-{
-    // Open PMM registers for write access
-    PMMCTL0_H = 0xA5;
-    // Set SVS/SVM high side new level
-    SVSMHCTL = SVSHE + SVSHRVL0 * level + SVMHE + SVSMHRRL0 * level;
-    // Set SVM low side to new level
-    SVSMLCTL = SVSLE + SVMLE + SVSMLRRL0 * level;
-    // Wait till SVM is settled
-    while ((PMMIFG & SVSMLDLYIFG) == 0);
-    // Clear already set flags
-    PMMIFG &= ~(SVMLVLRIFG + SVMLIFG);
-    // Set VCore to new level
-    PMMCTL0_L = PMMCOREV0 * level;
-    // Wait till new level reached
-    if ((PMMIFG & SVMLIFG))
-    while ((PMMIFG & SVMLVLRIFG) == 0);
-    // Set SVS/SVM low side to new level
-    SVSMLCTL = SVSLE + SVSLRVL0 * level + SVMLE + SVSMLRRL0 * level;
-    // Lock PMM registers for write access
-    PMMCTL0_H = 0x00;
+    #if KPH
+    UCAxCTL0 = UCCKPH + raise?0X00:UCCKPL + msb_first?UCMSB:0X00 + UCMST + UCMODE_2 + UCSYNC;
+    #else
+    UCAxCTL0 = raise?UCCKPL:0x00 + msb_first?UCMSB:0X00 + UCMST + UCMODE_2 + UCSYNC;
+    #endif
+    UCAxCTL1 = UCSSEL_3 + UCSWRST;
+    UCAxBRW = (4 * Mhz) / speed;
+    UCAxCTL1 &=~ UCSWRST;
+    msbfirst = msb_first;
 }
 
-void setupDCO(void)
-{
-
-      /* Power settings */
-      SetVCoreUp(1u);
-      SetVCoreUp(2u);
-      SetVCoreUp(3u);
-      //SetVCoreUp(4u);
-      //SetVCoreUp(5u);
-
-
-      UCSCTL3 = SELREF__REFOCLK;    // select REFO as FLL source
-      UCSCTL6 = XT1OFF | XT2OFF;    // turn off XT1 and XT2
-
-      /* Initialize DCO to 25.00MHz */
-      __bis_SR_register(SCG0);                  // Disable the FLL control loop
-      UCSCTL0 = 0x0000u;                        // Set lowest possible DCOx, MODx
-      UCSCTL1 = DCORSEL_6;                      // Set RSELx for DCO = 50 MHz
-      UCSCTL2 = 762u;                            // Set DCO Multiplier for 33.78MHz
-                                                // (N + 1) * FLLRef = Fdco
-                                                // (1023 + 1) * 32768 = 33.78MHz
-      UCSCTL4 = SELA__REFOCLK | SELS__DCOCLK | SELM__DCOCLK;
-      __bic_SR_register(SCG0);                  // Enable the FLL control loop
-
-      // Worst-case settling time for the DCO when the DCO range bits have been
-      // changed is n x 32 x 32 x f_MCLK / f_FLL_reference. See UCS chapter in 5xx
-      // UG for optimization.
-      // 32*32*25MHz/32768Hz = 781250 = MCLK cycles for DCO to settle
-      __delay_cycles(1062500u);
-
-
-      /* Loop until XT1,XT2 & DCO fault flag is cleared */
-      do
-      {
-        UCSCTL7 &= ~(XT2OFFG + XT1LFOFFG + XT1HFOFFG + DCOFFG);
-                                                // Clear XT2,XT1,DCO fault flags
-        SFRIFG1 &= ~OFIFG;                      // Clear fault flags
-      }
-      while (SFRIFG1&OFIFG);                    // Test oscillator fault flag
-
-
+void UCAxSPI_write_data(uint8_t data){
+    if(SS_LOW_ENABLE){
+        SS_PORT &=~ SS_PIN;
+    }
+    else{
+        SS_PORT |= SS_PIN;
+    }
+    UCAxTXBUF = data;
+    while(!(UCAxIFG & UCTXIFG));
+    if(SS_LOW_ENABLE){
+        SS_PORT |= SS_PIN;
+    }
+    else{
+        SS_PORT &=~ SS_PIN;
+    }
 }
+void UCAxSPI_write_data(uint8_t* data,uint8_t length){
+    for(uint8_t i = 0; i < length; i ++){
+        UCAxSPI_write_data(data[i]);
+    }
+}
+void UCAxSPI_write_data(uint16_t data){
+    if(SS_LOW_ENABLE){
+        SS_PORT &=~ SS_PIN;
+    }
+    else{
+        SS_PORT |= SS_PIN;
+    }
+    if(msbfirst){
+        UCAxTXBUF = (data&0xff00)>> 8;
+        while(!(UCAxIFG & UCTXIFG));
+        UCAxTXBUF = data&0x00ff;
+        while(!(UCAxIFG & UCTXIFG));
+    }
+    else{
+        UCAxTXBUF = data&0x00ff;
+        while(!(UCAxIFG & UCTXIFG));
+        UCAxTXBUF = (data&0xff00)>> 8;
+        while(!(UCAxIFG & UCTXIFG));
+    }
+    if(SS_LOW_ENABLE){
+        SS_PORT |= SS_PIN;
+    }
+    else{
+        SS_PORT &=~ SS_PIN;
+    }
+}
+void UCAxSPI_write_data(uint16_t* data,uint8_t length){
+    for(uint8_t i = 0; i < length; i ++){
+        UCAxSPI_write_data(data[i]);
+    }
+}
+
 
 int main(){
     uint16_t i = 0;
+    uint16_t data;
     WDTCTL = WDTPW | WDTHOLD;
     setupDCO();
+    UCAxSPI_master_init(true,1.21*Mhz,true);
 	P5SEL |= BIT4 | BIT5; 
 	P5SEL |= BIT2 | BIT3; 
     P3SEL |= BIT3 + BIT4;
@@ -96,15 +105,11 @@ int main(){
     P3DIR |= BIT3;
     P6DIR |= BIT6;
     P6OUT |= BIT6;
-    UCAxSPI_init(false,true,500*Khz);
     while(1){
         for(i = 0 ; i < 1024; i ++){
-            P6OUT &=~ BIT6;
-            USCI_A_SPI_transmitData(USCI_A0_BASE,(((i<<2)&0xff00)>>8)|0x00f0);
-            USCI_A_SPI_transmitData(USCI_A0_BASE,(i<<2)&0x00ff);
-            P6OUT |= BIT6;
+            data = (i<<2)| 0xf000;
+            UCAxSPI_write_data(data);
             __delay_cycles(3000);
-
         }
     }
 }
