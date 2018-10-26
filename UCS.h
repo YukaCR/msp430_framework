@@ -4,6 +4,7 @@
 #include <msp430.h>
 #include <stdint.h>
 #include <stdbool.h>
+#define XT1HFOFFG              (0x0004)       /* XT1 High Frequency Oscillator 1 Fault Flag */
 #define FLLRef 32768
 #define Mhz 1000000L
 #define Khz 1000L
@@ -83,7 +84,7 @@ void setupDCO(void)
       /* Loop until XT1,XT2 & DCO fault flag is cleared */
       do
       {
-        UCSCTL7 &= ~(XT2OFFG + XT1LFOFFG + XT1HFOFFG + DCOFFG);
+    	  UCSCTL7 &= ~(XT2OFFG + XT1LFOFFG + XT1HFOFFG + DCOFFG);
                                                 // Clear XT2,XT1,DCO fault flags
         SFRIFG1 &= ~OFIFG;                      // Clear fault flags
       }
