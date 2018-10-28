@@ -37,6 +37,14 @@ uint8_t spi_send(const uint8_t _data)
 	return UCAxRXBUF; // reading clears RXIFG flag
 }
 void UCAxSPI_master_init(bool msb_first,uint32_t speed,bool raise){
+	P5SEL |= BIT4 | BIT5; 
+	P5SEL |= BIT2 | BIT3; 
+    P3SEL |= BIT3 + BIT4;
+    P2SEL |= BIT7;
+    P3DIR |= BIT3;
+    P2DIR |= BIT7;
+    P6DIR |= BIT6;
+    P6OUT |= BIT6;
     UCS_setExternalClockSource(32768,4*Mhz);
     UCS_turnOnXT2(UCS_CLOCK_DIVIDER_1);
     UCS_initClockSignal(UCS_SMCLK,UCS_XT2CLK_SELECT,UCS_CLOCK_DIVIDER_1);
@@ -101,15 +109,6 @@ void UCAxSPI_write_data(uint16_t* data,uint8_t length){
 /* USCI_A_SPI_TestOK;
 int main(){
     uint16_t i = 0;
-    WDTCTL = WDTPW | WDTHOLD;
-	P5SEL |= BIT4 | BIT5; 
-	P5SEL |= BIT2 | BIT3; 
-    P3SEL |= BIT3 + BIT4;
-    P2SEL |= BIT7;
-    P3DIR |= BIT3;
-    P2DIR |= BIT7;
-    P6DIR |= BIT6;
-    P6OUT |= BIT6;
     setupDCO();
     UCAxSPI_master_init(true,1.21*Mhz,true);
     while(1){
