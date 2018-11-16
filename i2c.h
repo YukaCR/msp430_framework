@@ -23,7 +23,6 @@
 #define UCBxI2COA UCB0I2COA
 #define UCBxICTL UCB0ICTL
 #define max_fail_loop 1000
-
 uint16_t fail_loop=0;
 
 void i2c_master_reset();

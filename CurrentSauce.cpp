@@ -1,8 +1,8 @@
+#ifdef USING_MAIN_CURRENT_SAUCE
 #include <msp430.h>
 //#include "TLC5615.h"
 #include "i2c.h"
 //#include "FastPID.h"
-
 void slowDCO(void)
 {
 
@@ -45,9 +45,13 @@ void slowDCO(void)
 
 
 }
+/*
 int main(){
+#define MAX_FLR 0x0C00
+#define MIN_FLR	0x0B00
+#define MAX_FLN 70
     double current;
-    uint16_t ADCData;
+    uint16_t ADCData,prevADC_Data = 0;
     uint8_t TLCData = 1;
     uint16_t setpoint = 0; //2.2V / 11 / 1 = 200mA
     WDTCTL = WDTPW | WDTHOLD;
@@ -66,7 +70,13 @@ int main(){
 	i2c_write_block(0x48,0x40,TLCData,5);
     while(1){
         ADCData = ADC12MEM0;
-        setpoint = ADC12MEM1;
+        setpoint = (double)MIN_FLR+(((double)MAX_FLR - (double)MIN_FLR) * (double)ADC12MEM1) / (double)4096;
+        if(((ADCData - prevADC_Data)< MAX_FLN)&&ADCData<setpoint + MAX_FLN/4&& ADCData > setpoint - MAX_FLN/4){
+        	prevADC_Data = ADCData;
+        	setpoint = (double)MIN_FLR+(((double)MAX_FLR - (double)MIN_FLR) * (double)ADC12MEM1) / (double)4096;
+        	ADC12CTL0 |= ADC12SC;
+            __delay_cycles(2000);
+        }
         ADC12CTL0 |= ADC12SC;
         if(ADCData>setpoint){
             TLCData --;
@@ -81,8 +91,9 @@ int main(){
         else if(TLCData<=0x10){
             TLCData = 0x10;
         }
+        prevADC_Data = ADCData;
         current = (double)ADCData * (double)3.3 / (double)4096;
-        __delay_cycles(200);
+        __delay_cycles(2000);
     }
 }
 /*
@@ -98,3 +109,4 @@ int main(){
 	 }
 }
 */
+#endif

@@ -4,6 +4,7 @@
 #include <msp430.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include "TIDriver/ucs.h"
 #define XT1HFOFFG              (0x0004)       /* XT1 High Frequency Oscillator 1 Fault Flag */
 #define FLLRef 32768
 #define Mhz 1000000L
@@ -14,6 +15,8 @@
 #define BIT13 0X0D
 #define BIT14 0X0E
 #define BIT15 0X0F
+#define XT2_ENABLE 1
+#define XT2_DISABLE 0
 inline void DCO_DIV1();
 inline void DCO_DIV2();
 inline void DCO_DIV4();
@@ -27,6 +30,9 @@ inline void Clock_Init(bool xt2);
 void Set_DCO(unsigned int Delta);
 void SetVCoreUp(unsigned int);
 void setupDCO(void);//25MHz
+enum ClockSause{
+	DCO,SMCLK,ACLK
+};
 void SetVCoreUp (unsigned int level)
 {
     // Open PMM registers for write access
@@ -58,7 +64,7 @@ void setupDCO(void)
       SetVCoreUp(2u);
       SetVCoreUp(3u);
       //SetVCoreUp(4u);
-      //SetVCoreUp(5u);
+	  //SetVCoreUp(5u);
 
 
       UCSCTL3 = SELREF__REFOCLK;    // select REFO as FLL source
@@ -78,7 +84,7 @@ void setupDCO(void)
       // changed is n x 32 x 32 x f_MCLK / f_FLL_reference. See UCS chapter in 5xx
       // UG for optimization.
       // 32*32*25MHz/32768Hz = 781250 = MCLK cycles for DCO to settle
-      __delay_cycles(1062500u);
+      __delay_cycles(781250u);
 
 
       /* Loop until XT1,XT2 & DCO fault flag is cleared */
@@ -110,8 +116,12 @@ inline void Clock_Init(bool xt2)
 		// Clear XT2,XT1,DCO fault flags
 		SFRIFG1 &= ~OFIFG;                      
 		// Clear fault flags
-	}while (SFRIFG1&OFIFG);
+	}while (SFRIFG1&OFIFG); 
+	UCS_initClockSignal(UCS_ACLK,UCS_XT1CLK_SELECT,UCS_CLOCK_DIVIDER_1);
+    UCS_initClockSignal(UCS_SMCLK,UCS_XT2CLK_SELECT,UCS_CLOCK_DIVIDER_1);
+    UCS_initClockSignal(UCS_MCLK,UCS_DCOCLK_SELECT,UCS_CLOCK_DIVIDER_1);
 	// Test oscillator fault flag
+	//setupDCO();
 }
 /*DCO DIV SET D*/
 inline void DCO_DIV2()

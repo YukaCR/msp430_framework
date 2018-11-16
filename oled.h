@@ -13,18 +13,92 @@ const uint8_t oled_init_data[29]={0XAE,0X00,0X10,0X40,0X81,
 uint8_t current_font = 1;
 uint8_t x = 0;
 uint8_t	y = 0;
-char *itoa( int num, char *str, int radix );
+template <typename T>
+char *itoa(T num, char *str, int radix )
+{
+	const char index[] = "0123456789ABCDEF";
+	T unum;
+	int	i = 0, j, k;
+	if ( radix == 10 && num < 0 )
+	{
+		unum		= (T) -num;
+		str[i++]	= '-';
+	}else unum = (T) num;
+	do
+	{
+		str[i++]	= index[(long)unum % radix];
+		unum		/= radix;
+	}
+	while ( unum );
+	str[i] = '\0';
+	if ( str[0] == '-' )
+		k = 1;
+	else k = 0;
+	char temp;
+	for ( j = k; j <= (i - 1) / 2; j++ )
+	{
+		temp			= str[j];
+		str[j]			= str[i - 1 + k - j];
+		str[i - 1 + k - j]	= temp;
+	}
+	return(str);
+}
 void oled_write(uint8_t data);
-void OLED_setXY(uint8_t _x,uint8_t _y);
 void oled_write(const uint8_t *buffer, size_t size);
-void ftoa(float f, char *str, uint8_t precision);
-inline void oled_write(int8_t *buffer, size_t size);
-inline void oled_write(char *buffer, uint8_t size);
 void oled_write(const uint8_t *buffer, uint8_t size);
 void oled_write(const char *buffer, uint8_t size);
+inline void oled_write(int8_t *buffer, size_t size);
+inline void oled_write(char *buffer, uint8_t size);
+void OLED_setXY(uint8_t _x,uint8_t _y);
+void ftoa(float f, char *str, uint8_t precision);
 void OLED_fill(uint8_t data);
 void OLED_init();
 int i = 0;
+void oled_print(const char* data){
+    uint8_t length;
+    length = strlen(data);
+    oled_write(data,length);
+}
+void oled_println(const char* data){
+    oled_print(data);
+    oled_write('\n');
+}
+void oled_print(const double data,const uint8_t precision = 2){
+    int max_data=0;
+    char* buffer;
+    uint8_t max_length = 0;
+    max_data+= data;
+    while(max_data){
+        max_data /= 10;
+        max_length ++;
+    }
+    max_length ++;//.
+    if(data<0)max_length++;//-
+    max_length += precision;//dot
+    buffer = (char*)malloc(sizeof(char)*max_length);
+    ftoa(data,buffer,precision);
+    oled_write(buffer,max_length);
+    free(buffer);
+}
+inline void oled_print(const float data,const uint8_t precision = 2){
+    return oled_print((double)data,precision);
+}
+template<typename T>
+void oled_print_number(T num){
+    char* data;
+    T max_data = num; 
+    uint8_t max_length=0;
+    while(max_data){
+        max_length ++;
+        max_data /= 10;
+    }
+    data = (char*)malloc(sizeof(char)*max_length);
+    //delete max_length;
+    itoa(num,data,10);
+    oled_write(data,max_length);
+    free(data);
+}
+
 inline void oled_write(char *buffer, uint8_t size){
     return oled_write((uint8_t*)buffer,size);
 }
@@ -198,36 +272,5 @@ void ftoa(float f, char *str, uint8_t precision) {
   }
 }
 
-char *itoa( int num, char *str, int radix )
-{                                       /*缁便垹绱╃悰锟�*/
-	char		index[] = "0123456789ABCDEF";
-	unsigned	unum;           /*娑擃參妫块崣姗�鍣�*/
-	int		i = 0, j, k;
-/*绾喖鐣緐num閻ㄥ嫬锟斤拷*/
-	if ( radix == 10 && num < 0 )   /*閸椾浇绻橀崚鎯扮閺侊拷*/
-	{
-		unum		= (unsigned) -num;
-		str[i++]	= '-';
-	}else unum = (unsigned) num;    /*閸忔湹绮幆鍛枌*/
-/*鏉烆剚宕�*/
-	do
-	{
-		str[i++]	= index[unum % (unsigned) radix];
-		unum		/= radix;
-	}
-	while ( unum );
-	str[i] = '\0';
-/*闁棗绨�*/
-	if ( str[0] == '-' )
-		k = 1;  /*+鏉╂稑鍩�-閺侊拷*/
-	else k = 0;
-	char temp;
-	for ( j = k; j <= (i - 1) / 2; j++ )
-	{
-		temp			= str[j];
-		str[j]			= str[i - 1 + k - j];
-		str[i - 1 + k - j]	= temp;
-	}
-	return(str);
-}
+
 #endif
