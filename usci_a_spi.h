@@ -19,7 +19,7 @@
 #define UCAxSTAT UCA0STAT
 #define UCAxIFG UCA0IFG
 //KPH KPL DATA1
-// 0   0  Send on raise. first and last bit lost
+// 0   0  Send on raise. first and last bit lost: CLK
 // 0   1  Send on falldown. data not prepare ok.
 // 1   0  Send on raise. looks great.
 // 1   1  Send on falldown. looks great.
@@ -28,13 +28,20 @@
 //recommand KPH = 1
 bool SS_LOW_ENABLE = true;
 bool msbfirst;
+
+uint8_t spi_send(const uint8_t _data);
+void UCAxSPI_master_init(bool msb_first,uint32_t speed,bool raise);
+void spi_ss_enable();
+void spi_ss_disable();
+void UCAxSPI_write_data(uint8_t data);
+void UCAxSPI_write_data(uint8_t* data,uint8_t length);
+void UCAxSPI_write_data(uint16_t data);
+void UCAxSPI_write_data(uint16_t* data,uint8_t length);
 uint8_t spi_send(const uint8_t _data)
 {
-	UCAxTXBUF = _data; // setting TXBUF clears the TXIFG flag
-	while (UCAxSTAT & UCBUSY)
-		; // wait for SPI TX/RX to finish
-
-	return UCAxRXBUF; // reading clears RXIFG flag
+	UCAxTXBUF = _data; 
+	while (UCAxSTAT & UCBUSY);
+	return UCAxRXBUF;
 }
 void UCAxSPI_master_init(bool msb_first,uint32_t speed,bool raise){
 	P5SEL |= BIT4 | BIT5; 

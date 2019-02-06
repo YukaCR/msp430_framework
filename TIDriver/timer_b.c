@@ -46,7 +46,7 @@
 
 #ifdef __MSP430_HAS_TxB7__
 #include "timer_b.h"
-
+#include "stdint.h"
 #include <assert.h>
 
 void Timer_B_startCounter ( uint16_t baseAddress,
