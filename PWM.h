@@ -4,7 +4,7 @@
 #include "TIDriver/ucs.h"
 /*
     Using TimerA2,PWM at 500kHz
-    F5529
+    F5529   
     P2.0 <- Oscillator
     P2.5 -> PWM1 out
     P2.2 -> PWM2 out
@@ -20,12 +20,12 @@
 #define TAxIV       TA2IV           /* Timer2_A3 Interrupt Vector Word */
 #define TAxEX0      TA2EX0          /* Timer2_A3 Expansion Register 0 */
 #define TIMERx_A0_VECTOR TIMER2_A0_VECTOR
-#define TIMERx_A1_VECTOR TIMER2_A1_VECTOR
+#define TIMERx_A1_VEC    TOR TIMER2_A1_VECTOR
 #define Use4MHzCrystal 1
-#define reservePWM1     1
+#define PWM1MODE    OUTMOD_6    //OUTMOD_6 || OUTMOD_2(RESERVE)
 #define EnablePWM2     1
-#define reservePWM2     1
-#define freq 1000
+#define PWM2MODE    OUTMOD_2    //OUTMOD_6 || OUTMOD_2(RESERVE)
+#define PWMFreq 1000
 //Calc <- SPWM_Calculator.py
 #define Period 400
 #define EnableSPWM 0
@@ -39,16 +39,16 @@ uint16_t SPWM_Current = 0;
 #else
     #undef Period
     #if Use4MHzCrystal
-        #if freq < 65
+        #if PWMFreq < 65
             #define Period 65535 //too low
         #else
-            #define Period (uint16_t)(4000000L / freq)
+            #define Period (uint16_t)((double)4000000L / (double)PWMFreq)
         #endif
     #else
-        #if freq < 195
+        #if PWMFreq < 195
             #define Period 65535 //too low
         #else
-            #define Period (uint16_t)(12000000L / freq)
+            #define Period (uint16_t)((double)12000000L / (double)PWMFreq)
         #endif
     #endif
 #endif
@@ -61,36 +61,36 @@ void InitPWM(uint16_t PWM1_Value = 0,uint16_t PWM2_Value = 0){
     //to 10KHz , using TACCR , 12 * MHz / 10 * 2 * KHz = 600(?????Why so low)
     //Use as comprator PWM_Opt.compareOutputMode = TIMER_A_OUTPUTMODE_OUTBITVALUE;
 #if TAxCTL == TA2CTL
-    P2SEL |= BIT2 | BIT5;
+    P2SEL |= BIT2 | BIT5 | BIT4;
+    P2DIR |= BIT5 | BIT4;
+	P5SEL |= BIT4 | BIT5 | BIT2 |BIT3; 
 #endif
 #if Use4MHzCrystal
-    UCS_setExternalClockSource(32768,4000000);
+    UCS_setExternalClockSource(32768,4*Mhz);
     UCS_turnOnXT2(UCS_XT2_DRIVE_4MHZ_8MHZ);
-    UCS_initClockSignal(UCS_SMCLK,UCLKSEL__XT2CLK,UCS_CLOCK_DIVIDER_1);
+    UCS_turnOnLFXT1(UCS_XT1_DRIVE_0,UCS_XCAP_3);
+    UCS_setExternalClockSource(32768,4*Mhz);
+    UCS_initClockSignal(UCS_SMCLK,UCS_XT2CLK_SELECT,UCS_CLOCK_DIVIDER_1);
     TAxCTL   = TASSEL__SMCLK + ID_0 + MC__STOP;
 #else
     TAxCTL   = TASSEL__TACLK + ID_0 + MC__STOP;
 #endif
     TAxCCR0  = Period;
     TAxCCTL0 = CM_1 + SCS + SCCI + CAP + CCIE;
-#if reservePWM1
-    TAxCCTL2 = CM_0 + SCS + OUTMOD_0 ;
-#else
-    TAxCCTL2 = CM_0 + SCS + OUTMOD_0 + OUT;
-#endif
+    TAxCCTL2 = CM_0 + SCS + PWM1MODE ;
 #if EnablePWM2
-    #if reservePWM2
-        TAxCCTL1 = CM_0 + SCS + OUTMOD_0 ;
-    #else
-        TAxCCTL1 = CM_0 + SCS + OUTMOD_0 + OUT;
-    #endif
+    TAxCCTL1 = CM_0 + SCS + PWM2MODE + OUT;
+    TAxCCR1  = PWM2_Value;
 #endif
     TAxCCR2  = PWM1_Value;
 #if EnableSPWM
     TAxCTL  |= MC__UPDOWN + TAIE + TACLR;
 #else
-    TAxCTL  |= MC__CONTINUOUS + TACLR;
+    TAxCTL  |= MC__UP + TACLR;
 #endif 
+}
+inline void InitPWMPercent(uint16_t PWM1Value = 0,uint16_t PWM2Value = 0){
+    return InitPWM((uint16_t)(PWM1Value * (double)Period / 100.0),(uint16_t)(PWM2Value * (double)Period / 100.0));
 }
 inline void SetPWM1(uint16_t Value){
     TAxCCR2 = Value;
@@ -101,11 +101,11 @@ inline void SetPWM2(uint16_t Value){
 }
 #endif
 inline void SetPWM1Persent(uint16_t Value){
-    TAxCCR2 = Value * Period / 100;
+    TAxCCR2 =(uint16_t)(Value * (double)Period / 100.0);
 }
 #if EnablePWM2
 inline void SetPWM2Persent(uint16_t Value){
-    TAxCCR1 = Value* Period / 100;
+    TAxCCR1 = (uint16_t)(Value * (double)Period / 100.0);
 }
 #endif
 #pragma vector = TIMER2_A0_VECTOR
