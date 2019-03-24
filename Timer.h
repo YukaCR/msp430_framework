@@ -1,4 +1,4 @@
-#include "TIDriver/ucs.h"
+/*#include "TIDriver/ucs.h"
 #include "msp430.h"
 #include "UCS.h"
 #ifdef VS_CODE
@@ -11,10 +11,9 @@ inline void TA0_OV_CCR_ISR();
 interrupt void T0A1_ISR(){
     TA0_OF_CCR_ISR();
     TA0CTL &=~ TAIFG;
-    TA0CCTL1 &=~ CCIFG;
-    TA0CCTL2 &=~ CCIFG;
-    TA0CCTL3 &=~ CCIFG;
-    TA0CCTL4 &=~ CCIFG;
+    TA0CCR1 &=~ CCIFG;
+    TA0CCR2 &=~ CCIFG;
+    TA0CCR3 &=~ CCIFG;
 }
 #endif
 #if defined(USE_TA0_CCR0_ISR)
@@ -68,8 +67,8 @@ void InitTimer0A0(bool USE_ACLK = false){
 #endif
 }
 enum TIMER_MODE{
-    STOP=0,UP,CONTINUOIS,UP_DOWN
+    STOP,UP,CONTINUOIS,UP_DOWN
 };
-void Start_Timer0_A0(TIMER_MODE MODE = UP,uint16_t Div = ID_0){
+void Start_Timer0_A0(TIMER_MODE MODE = UP){
     TA0CTL |= MODE << 6 + TACLR;
-}
+}*/
