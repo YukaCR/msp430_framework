@@ -4,4 +4,9 @@
 #include <msp430.h>
 #define interrupt
 #endif // !__VS_CODE_H__
+int main(){
+    WDTCTL = WDTPW | WDTHOLD;
+    _main();
+}
+#define main() inline _main()
 #endif // __VS_CODE__

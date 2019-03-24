@@ -1,6 +1,6 @@
 #ifndef __OLED_H__
 #define __OLED_H__
-#include "i2c.h"
+#include "usci_b_i2c.h"
 #include "oledfont.h"
 #include "string.h"
 #include "stdlib.h"

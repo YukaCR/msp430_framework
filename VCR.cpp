@@ -1,3 +1,4 @@
+/*
 #include <msp430.h>
 #include "oled.h"
 #include "UCS.h"
@@ -102,7 +103,7 @@ interrupt void T0A0_ISR(){
     //d_data += data;
     //d_data /= OPR;
     //d_data /= OPR;
-    Vrms = sqrt(Vrms / (double)total_clock);     //CALCULATE Vrms//¡Ì Sum[u^2dt]/T
+    Vrms = sqrt(Vrms / (double)total_clock);     //CALCULATE Vrms//ï¿½ï¿½ Sum[u^2dt]/T
     if(((double)(Vpeak-Vmin) * (double)LOGIC_VOL / (double)(4096)) - (double)LOGIC_OFF > 0.2){
         Vrms /= ORI;
     }
@@ -154,4 +155,4 @@ interrupt void ADC_ISR(){//500us
     if(Vmin > ADC_Data){
         Vmin = ADC_Data;
     }
-}
+}*/
