@@ -11,6 +11,9 @@
 #include "TIDriver/ucs.h" 
 #include "Freq.h"
 #define UCBx 0           //UCB0 UCB1
+#undef UCBxCTL0
+#undef UCBxCTL1
+#undef UCBxIFG
 #define UCBxCTL0 UCB0CTL0
 #define UCBxCTL1 UCB0CTL1
 #define UCBxBRW UCB0BRW
@@ -22,7 +25,7 @@
 #define UCBxRXBUF UCB0RXBUF
 #define UCBxI2COA UCB0I2COA
 #define UCBxICTL UCB0ICTL
-#define max_fail_loop 1000
+#define max_fail_loop 5
 uint16_t fail_loop=0;
 
 void i2c_master_reset();

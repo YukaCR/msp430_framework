@@ -1,4 +1,4 @@
-/*
+#if 0
 #include <msp430.h>
 #include "oled.h"
 #include "UCS.h"
@@ -155,4 +155,5 @@ interrupt void ADC_ISR(){//500us
     if(Vmin > ADC_Data){
         Vmin = ADC_Data;
     }
-}*/
+}
+#endif

@@ -1,4 +1,4 @@
-
+#if 0
 #ifndef __MSP430__UCS__
 #define __MSP430__UCS__
 #include <msp430.h>
@@ -370,3 +370,4 @@ inline void SMCLK_SOURCE_DCO(){
 }
 #endif
 #endif // !__MSP430__UCS__
+#endif

@@ -1,4 +1,4 @@
-#ifdef USING_MAIN_CURRENT_SAUCE
+#if 0
 #include <msp430.h>
 //#include "TLC5615.h"
 #include "i2c.h"
@@ -45,7 +45,6 @@ void slowDCO(void)
 
 
 }
-/*
 int main(){
 #define MAX_FLR 0x0C00
 #define MIN_FLR	0x0B00
@@ -96,7 +95,6 @@ int main(){
         __delay_cycles(2000);
     }
 }
-/*
 int main(){
 	uint8_t TLCData = 0;
 	WDTCTL = WDTPW | WDTHOLD;
@@ -108,5 +106,4 @@ int main(){
 		 }
 	 }
 }
-*/
 #endif

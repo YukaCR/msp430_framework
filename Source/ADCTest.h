@@ -1,9 +1,30 @@
-#ifdef USING_MAIN_CURRENT_SAUCE
+#if 0
+#ifndef __ADC_12_H__
+#define __ADC_12_H__
 #include <msp430.h>
-//#include "TLC5615.h"
-#include "i2c.h"
-//#include "FastPID.h"
-void slowDCO(void)
+#include "UCS.h"
+#include "TIDriver/ucs.h"
+#include "TLC5615.h"
+#include "oled.h"
+#include <stdlib.h>
+void ADC12_init(){
+	P5SEL |= BIT4 | BIT5; 
+	P5SEL |= BIT2 | BIT3; 
+    P3SEL |= BIT3 + BIT4;
+    P2SEL |= BIT7;
+    P3DIR |= BIT3;
+    P2DIR |= BIT7;
+    P6DIR |= BIT6;
+    P6OUT |= BIT6;
+    UCS_setExternalClockSource(32768,4*Mhz);
+    UCS_turnOnXT2(UCS_XT2_DRIVE_4MHZ_8MHZ);
+    UCS_initClockSignal(UCS_SMCLK,UCS_XT2CLK_SELECT,UCS_CLOCK_DIVIDER_1);
+    ADC12CTL0 = ADC12SHT1_2 + ADC12SHT0_2 + ADC12MSC + ADC12ON; 
+    ADC12CTL1 = ADC12SHS_0 + ADC12SHP + ADC12DIV_0 + ADC12SSEL_3;
+    ADC12CTL2 = ADC12RES_2 ;
+    ADC12CTL0 |= ADC12ENC;
+}
+void setupDCO(void)
 {
 
       // Power settings
@@ -45,68 +66,29 @@ void slowDCO(void)
 
 
 }
-/*
 int main(){
-#define MAX_FLR 0x0C00
-#define MIN_FLR	0x0B00
-#define MAX_FLN 70
-    double current;
-    uint16_t ADCData,prevADC_Data = 0;
-    uint8_t TLCData = 1;
-    uint16_t setpoint = 0; //2.2V / 11 / 1 = 200mA
     WDTCTL = WDTPW | WDTHOLD;
 	P5SEL |= BIT4 + BIT5;
 	P5SEL |= BIT2 + BIT3; 
 	P3SEL |= BIT0 + BIT1;
-    P6SEL |= BIT5 + BIT0;
-    slowDCO(); 
-    i2c_master_init();
+    P6SEL |= BIT5;
+	setupDCO();								//Fuck you TI , up to 34Mhz
+    //ADC12_init();
+    //ADC12_Single_Setup(ADCMCTLx_P6_5,ADC_P6_5);
+    OLED_init();
     ADC12CTL0 = ADC12ON+ADC12MSC+ADC12SHT0_8;
-    ADC12CTL1 = ADC12SHP + ADC12CONSEQ_1;
+    ADC12CTL1 = ADC12SHP + ADC12CONSEQ_2;
     ADC12MCTL0 = ADC12INCH_5;
-    ADC12MCTL1 = ADC12INCH_0+ADC12EOS;
     ADC12CTL0 |= ADC12ENC;
     ADC12CTL0 |= ADC12SC;
-	i2c_write_block(0x48,0x40,TLCData,5);
+    OLED_fill(0x00);
     while(1){
-        ADCData = ADC12MEM0;
-        setpoint = (double)MIN_FLR+(((double)MAX_FLR - (double)MIN_FLR) * (double)ADC12MEM1) / (double)4096;
-        if(((ADCData - prevADC_Data)< MAX_FLN)&&ADCData<setpoint + MAX_FLN/4&& ADCData > setpoint - MAX_FLN/4){
-        	prevADC_Data = ADCData;
-        	setpoint = (double)MIN_FLR+(((double)MAX_FLR - (double)MIN_FLR) * (double)ADC12MEM1) / (double)4096;
-        	ADC12CTL0 |= ADC12SC;
-            __delay_cycles(2000);
-        }
+        OLED_setXY(0,0);
         ADC12CTL0 |= ADC12SC;
-        if(ADCData>setpoint){
-            TLCData --;
-        }
-        else if(ADCData<setpoint){
-            TLCData ++;
-        }
-		i2c_write_block(0x48,0x40,TLCData,5);
-        if(TLCData>=0xe0){
-            TLCData = 0xe0;
-        }
-        else if(TLCData<=0x10){
-            TLCData = 0x10;
-        }
-        prevADC_Data = ADCData;
-        current = (double)ADCData * (double)3.3 / (double)4096;
-        __delay_cycles(2000);
+        //TLC5615_setValue((double)256*(double)rand()/(double)RAND_MAX);
+        oled_write((double)ADC12MEM0 * (double)3.3 / (double)4096,3);
+        __delay_cycles(10000000);
     }
 }
-/*
-int main(){
-	uint8_t TLCData = 0;
-	WDTCTL = WDTPW | WDTHOLD;
-	i2c_master_init();
-	 while(1){
-		 for(TLCData=0x10;TLCData<=0xe0;TLCData++){
-			i2c_write_block(0x48,0x40,TLCData,5);
-            __delay_cycles(5000);
-		 }
-	 }
-}
-*/
+#endif
 #endif

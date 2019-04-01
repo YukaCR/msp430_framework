@@ -52,6 +52,11 @@ inline void oled_write(char *buffer, uint8_t size);
 void OLED_setXY(uint8_t _x,uint8_t _y);
 void ftoa(float f, char *str, uint8_t precision);
 void OLED_fill(uint8_t data);
+template <typename T>
+inline void OLED_printAt(T buffer,uint8_t _x,uint8_t _y,uint8_t size){
+    OLED_setXY(_x,_y)
+    return oled_write(T,size)
+}
 void OLED_init();
 int i = 0;
 void oled_print(const char* data){

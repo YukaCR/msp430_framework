@@ -3,13 +3,19 @@
 #include <stdint-gcc.h>
 #include <msp430.h>
 #define interrupt
+#define nullptr 0x00L
 #endif // !__VS_CODE_H__
 #endif // __VS_CODE__
+#ifndef __VS_CODE_H__
+#define __VS_CODE_H__
 #include <msp430.h>
+#include <msp430f5xx_6xxgeneric.h>
+#define XT1HFOFFG              (0x0004)       /* XT1 High Frequency Oscillator 1 Fault Flag */
+#define Wmain main
 int _main();
 void setupDCO(void);
 void SetVCoreUp (unsigned int level);
-int main(){
+int Wmain(){
     WDTCTL = WDTPW | WDTHOLD;
     setupDCO();
     _main();
@@ -79,3 +85,4 @@ void setupDCO(void)
 
 
 }
+#endif

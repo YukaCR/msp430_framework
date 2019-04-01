@@ -1,3 +1,4 @@
+#if 1
 /*
 *	use P1_3 P2_3 as counter port
 *	1.698Mhz 1%
@@ -160,7 +161,7 @@ interrupt void T1A1_ISR(){
 	//	TA0CTL &=~ TAIE;
 	//}
 }
-/* TEST PASS 02 TA1 AT 4MHZ*
+ TEST PASS 02 TA1 AT 4MHZ*
 #pragma vector = TIMER0_A1_VECTOR
 interrupt void T0A1_ISR(){
 	//TA0CTL |=  TACLR;
@@ -171,7 +172,7 @@ interrupt void T0A1_ISR(){
 	//	TA0CTL &=~ TAIE;
 	//}
 }
-/* TEST PASS 01 PORT1 INTERRUPT
+TEST PASS 01 PORT1 INTERRUPT
 #pragma vector = PORT1_VECTOR
 interrupt void P1_ISR(){
 	P1IFG = 0X00;
@@ -217,13 +218,13 @@ interrupt void P1_ISR(){
 	//	P1IE &=~ BIT3;
 	//}
 }
-/* TEST PASS 04 PORT2 INTERRUPT
+ TEST PASS 04 PORT2 INTERRUPT
 #pragma vector = PORT2_VECTOR
 interrupt void P2_ISR(){
 	P2IFG = 0X00;
 	NxCount++;
 }
-/*
+
  * FUCK TI.SO SLOW 
  * https://e2e.ti.com/support/microcontrollers/msp430/f/166/t/145592?MSP430F5529-Clock-Configuration-for-25Mhz
  */
@@ -300,4 +301,5 @@ void burnDCO(void)
 
 }
 
+#endif
 #endif

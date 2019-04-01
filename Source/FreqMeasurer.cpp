@@ -1,4 +1,4 @@
-/* Developed ok.
+#if 0
 #include <msp430.h>
 #include "Freq.h"
 #include "oled.h"
@@ -57,8 +57,6 @@ void Freq_measurer_process(double data){
     free(dot);
     _freq_start();
 }
-*/
-/*
 int main(){
     WDTCTL = WDTPW | WDTHOLD;	// Stop watchdog timer
     OLED_init();
@@ -70,4 +68,4 @@ int main(){
         continue;
     }
 }
-*/
+#endif

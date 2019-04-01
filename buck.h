@@ -4,9 +4,9 @@
 #include "TIDriver/ucs.h"
 #include "PWM.h"
 #include "vscode.h"
-int main()
+int dmain()
 {
-    InitPWMPercent(50,10);
+  InitPWMPercent(50,10);
 
   P1DIR |= BIT0;                            // ACLK set out to pins
   P1SEL |= BIT0;                            
