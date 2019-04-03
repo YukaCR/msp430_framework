@@ -3,6 +3,7 @@
 #include <msp430.h>
 #define FREQ_PLUS_COUNTER_TIMER TIMER_A1_BASE
 #define ENABLE_PWN 1
+#define Mhz 1000000L
 //PWM.h
 #if defined(PWM_H)
 #ifndef _PROFILE_PWN_H_

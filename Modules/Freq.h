@@ -90,10 +90,10 @@ void _freq_init(void)
 	P5SEL |= BIT2 + BIT3; 
 	P3SEL |= BIT0 + BIT1;
 	   burnDCO();								//Fuck you TI , up to 34Mhz
-    UCS_setExternalClockSource(32768,4*Mhz);
+    UCS_setExternalClockSource(32768,4000000L);
     UCS_turnOnXT2(UCS_XT2_DRIVE_4MHZ_8MHZ);
     UCS_turnOnLFXT1(UCS_XT1_DRIVE_0,UCS_XCAP_3);
-    UCS_setExternalClockSource(32768,4*Mhz);
+    UCS_setExternalClockSource(32768,4000000L);
     __delay_cycles(1000);
     UCS_initClockSignal(UCS_ACLK,UCS_XT1CLK_SELECT,UCS_CLOCK_DIVIDER_1);
     UCS_initClockSignal(UCS_SMCLK,UCS_XT2CLK_SELECT,UCS_CLOCK_DIVIDER_1);

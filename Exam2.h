@@ -3,7 +3,7 @@
 #include "Modules/PWM.h"
 #include "Modules/Freq+.h"
 #include "Modules/ButtonMartix.h"
-#include "Modules/oled.h"
+#include "Modules/oled_hw.h"
 #include "profile_int.h"
 uint16_t OutputFreq = 1000;
 uint16_t PWM1_percent = 50;
@@ -57,12 +57,15 @@ void Key_Srv(uint8_t key){
             break;
     }
 }
+#if 0
 int main(){
     FreqCallback = Freq_Srv;
     ButtonCallback = Key_Srv;
+    Button_Martix_Init();
     InitPWMPercent(50,50);
     FreqInit();
     SetPWMFreq(OutputFreq);
+    i2c_master_init();
     OLED_init();
     OLED_setXY(0,0);
     oled_print("Freq:");
@@ -79,3 +82,4 @@ int main(){
         continue;
     };
 }
+#endif

@@ -4,6 +4,7 @@
 #include "oledfont.h"
 #include "string.h"
 #include "stdlib.h"
+#include "math.h"
 #define OLED_ADDRESS 0x3c
 const uint8_t oled_init_data[29]={0XAE,0X00,0X10,0X40,0X81,
 		0XCF,0XA1,0XC8,0XA6,0XA8,0X3F,

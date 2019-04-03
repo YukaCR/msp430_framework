@@ -9,15 +9,23 @@
 #ifndef __VS_CODE_H__
 #define __VS_CODE_H__
 #include <msp430.h>
+#include "TIDriver/UCS.h"
 #include <msp430f5xx_6xxgeneric.h>
+#define Mhz 1000000L
 #define XT1HFOFFG              (0x0004)       /* XT1 High Frequency Oscillator 1 Fault Flag */
-#define Wmain main
 int _main();
 void setupDCO(void);
 void SetVCoreUp (unsigned int level);
-int Wmain(){
+int main(){
+    __enable_interrupt();
     WDTCTL = WDTPW | WDTHOLD;
     setupDCO();
+    P5SEL |= BIT4 + BIT5+BIT2 + BIT3;
+    UCS_setExternalClockSource(32768, 4*Mhz);
+    UCS_turnOnXT2(UCS_XT2_DRIVE_4MHZ_8MHZ);
+    UCS_turnOnLFXT1(UCS_XT1_DRIVE_0, UCS_XCAP_3);
+    UCS_initClockSignal(UCS_SMCLK, UCS_XT2CLK_SELECT, UCS_CLOCK_DIVIDER_1);
+    UCS_initClockSignal(UCS_ACLK, UCS_XT1CLK_SELECT, UCS_CLOCK_DIVIDER_1);
     _main();
 }
 #define main() inline _main()
