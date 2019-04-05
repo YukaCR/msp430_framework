@@ -56,7 +56,7 @@ void i2c_master_init(){
     P3OUT |= BIT0+ BIT1;
     P3SEL |= BIT0 + BIT1;
     P3REN |= BIT0 + BIT1;
-    P3DIR = BIT0 + BIT1;
+    P3DIR |= BIT0 + BIT1;
     #endif
    UCS_setExternalClockSource(32768,4*Mhz);
    UCS_turnOnXT2(UCS_XT2_DRIVE_4MHZ_8MHZ);

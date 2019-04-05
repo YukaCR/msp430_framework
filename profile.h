@@ -34,7 +34,7 @@
 #if defined(__Freq_Plus_H__)
 #ifndef _PROFILE_Freq_H_
 #define _PROFILE_Freq_H_
-#define CalcPWMPercent              1
+#define CalcPWMPercent              0
 #define FREQ_PLUS_COUNTER_TIMER TIMER_A1_BASE
 #define FREQ_PLUS_GATE_TIMER TIMER_A0_BASE
 #define Freq_Counter_TAxCTL TA1CTL     /* Timer2_A3 Control */

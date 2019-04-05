@@ -1,10 +1,14 @@
 #include "usci_i2c_hw.h"
+#include "stdlib.h"
+#include "string.h"
+#include "math.h"
 unsigned char _Addr = 0, _displayfunction = 0, _displaycontrol = 0, _displaymode = 0, _numlines = 0,
               _cols = 0, _rows = 0, _backlightval = 0;
 void __init__(uint8_t LCD_Addr, uint8_t LCD_cols, uint8_t LCD_rows);
 void begin(uint8_t cols, uint8_t lines, uint8_t dotsize);
 void clear();
 void home();
+void ftoa(float f, char *str, uint8_t precision);
 void noCursor();
 void cursor();
 void scrollDisplayLeft();
@@ -28,10 +32,67 @@ void i2c_writeto(uint8_t, uint8_t);
 void printStr(char *dstr);
 void printChar(char ch);
 void printInt(uint8_t num);
-void printFloat(double num, char acc);
+void printFloat(double num, uint8_t acc);
 char *itoa(int num, char *str, int radix);
 void Delay1ms();
 uint8_t powInt(uint8_t x, uint8_t y);
+void ftoa(float f, char *str, uint8_t precision) {
+  uint8_t i, j, divisor = 1;
+  int8_t log_f;
+  int32_t int_digits = (int)f;             //store the integer digits
+  float decimals;
+  char s1[12];
+
+  memset(str, 0, sizeof(s1));
+  memset(s1, 0, 10);
+
+  if (f < 0) {                             //if a negative number
+    str[0] = '-';                          //start the char array with '-'
+    f = abs(f);                            //store its positive absolute value
+  }
+  log_f = ceil(log10(f));                  //get number of digits before the decimal
+  if (log_f > 0) {                         //log value > 0 indicates a number > 1
+    if (log_f == precision) {              //if number of digits = significant figures
+      f += 0.5;                            //add 0.5 to round up decimals >= 0.5
+      itoa(f, s1, 10);                     //itoa converts the number to a char array
+      strcat(str, s1);                     //add to the number string
+    }
+    else if ((log_f - precision) > 0) {    //if more integer digits than significant digits
+      i = log_f - precision;               //count digits to discard
+      divisor = 10;
+      for (j = 0; j < i; j++) divisor *= 10;    //divisor isolates our desired integer digits
+      f /= divisor;                             //divide
+      f += 0.5;                            //round when converting to int
+      int_digits = (int)f;
+      int_digits *= divisor;               //and multiply back to the adjusted value
+      itoa(int_digits, s1, 10);
+      strcat(str, s1);
+    }
+    else {                                 //if more precision specified than integer digits,
+      itoa(int_digits, s1, 10);            //convert
+      strcat(str, s1);                     //and append
+    }
+  }
+
+  else {                                   //decimal fractions between 0 and 1: leading 0
+    s1[0] = '0';
+    strcat(str, s1);
+  }
+
+  if (log_f < precision) {                 //if precision exceeds number of integer digits,
+    decimals = f - (int)f;                 //get decimal value as float
+    strcat(str, ".");                      //append decimal point to char array
+
+    i = precision - log_f;                 //number of decimals to read
+    for (j = 0; j < i; j++) {              //for each,
+      decimals *= 10;                      //multiply decimals by 10
+      if (j == (i-1)) decimals += 0.5;     //and if it's the last, add 0.5 to round it
+      itoa((int)decimals, s1, 10);         //convert as integer to character array
+      strcat(str, s1);                     //append to string
+      decimals -= (int)decimals;           //and remove, moving to the next
+    }
+  }
+}
 inline void sleep_us(uint8_t r)
 {
     while (r--)
@@ -225,15 +286,14 @@ void printChar(char ch)
 }
 void printInt(uint8_t num)
 {
-    char std[5];
+    char std[5] = {0,0,0,0,0};
     printStr(itoa(num, std, 10));
 }
-void printFloat(double num, char acc)
+void printFloat(double num, uint8_t acc)
 {
-    printInt((int)num);
-    printInt('.');
-    num -= (int)num;
-    printInt((int)(num * powInt(10, acc)));
+    char ftoap[10] = "";
+    ftoa(num,ftoap,acc);
+    printStr(ftoap);
 }
 uint8_t powInt(uint8_t x, uint8_t y)
 {
@@ -245,29 +305,29 @@ uint8_t powInt(uint8_t x, uint8_t y)
     return x;
 }
 char *itoa(int num, char *str, int radix)
-{ /*索引表*/
+{ /*绱㈠紩琛�*/
     char index[] = "0123456789ABCDEF";
-    unsigned unum; /*中间变量*/
+    unsigned unum; /*涓棿鍙橀噺*/
     char temp;
     int i = 0, j, k;
-    /*确定unum的值*/
-    if (radix == 10 && num < 0) /*十进制负数*/
+    /*纭畾unum鐨勫��*/
+    if (radix == 10 && num < 0) /*鍗佽繘鍒惰礋鏁�*/
     {
         unum = (unsigned)-num;
         str[i++] = '-';
     }
     else
-        unum = (unsigned)num; /*其他情况*/
-    /*转换*/
+        unum = (unsigned)num; /*鍏朵粬鎯呭喌*/
+    /*杞崲*/
     do
     {
         str[i++] = index[unum % (unsigned)radix];
         unum /= radix;
     } while (unum);
     str[i] = '\0';
-    /*逆序*/
+    /*閫嗗簭*/
     if (str[0] == '-')
-        k = 1; /*十进制负数*/
+        k = 1; /*鍗佽繘鍒惰礋鏁�*/
     else
         k = 0;
     for (j = k; j <= (i - 1) / 2; j++)

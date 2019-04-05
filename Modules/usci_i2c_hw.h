@@ -1,9 +1,5 @@
 #ifndef __I2C_HW_H__
 #define __I2C_HW_H__
-#define uint8_t unsigned char
-#define uint16_t unsigned int
-#define uint32_t unsigned long
-#define uint64_t unsigned long long
 #include <msp430.h>
 #include "../vscode.h"
 char count;
@@ -16,7 +12,7 @@ void i2c_send_init(uint8_t slave_address, uint16_t prescale = 12)
     P3OUT |= BIT0+ BIT1;
     P3SEL |= BIT0 + BIT1;
     P3REN |= BIT0 + BIT1;
-    P3DIR = BIT0 + BIT1;
+    P3DIR |= BIT0 + BIT1;
     UCB0CTL1 = UCSWRST;                   // Enable SW reset
     UCB0CTL0 = UCMST + UCMODE_3 + UCSYNC; // I2C Master, synchronous mode
     UCB0CTL1 = UCSSEL_2 + UCSWRST;        // Use SMCLK, keep SW reset

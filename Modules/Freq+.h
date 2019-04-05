@@ -1,6 +1,6 @@
 /*
 *   Freq+.H: Freq Measure Module using TimerAxCLK
-*   Up to 165Mhz
+*   Up to 2Mhz 1%
 */
 
 #ifndef __Freq_Plus_H__
@@ -13,15 +13,17 @@
 
 double FreqResult = 0x00;
 uint16_t CounterOverflow = 0;
-uint16_t GateOverflow = 100;
-uint16_t GateStartOV = 0;
+int16_t GateOverflow = 100;
+int16_t GateStartOV = 0;
 uint16_t GateStartR = 0;
 #if CalcPWMPercent
 uint8_t Freq_stage = 0;
+double Freq_Percent = 0;
+bool Freq_Percent_Flag = 0;
 #else
 bool Freq_stage = 0;
 #endif
-bool FreqReady = 0;
+bool Freq_Flag = 0;
 inline void FreqInit();
 inline void FreqStart();
 inline void FreqStop();
@@ -30,10 +32,16 @@ void (*FreqCallback)(double) = nullptr;
 #if CalcPWMPercent
 void (*FreqPercentCallback)(double) = nullptr;
 #endif
-inline uint32_t getFreq()
-{
-    FreqReady = 0;
-    return FreqResult;
+void FreqStop(){
+#if FREQ_PLUS_COUNTER_TIMER == TIMER_A2_BASE
+    P2SEL &=~ BIT2; //TA2CLK
+#else
+    P1SEL &=~ BIT6;  //TA1CLK
+    P1IE &=~ BIT6;  //TA1CLK
+#endif
+    Freq_Counter_TAxCTL = TASSEL__TACLK + ID_0 + MC__STOP;
+    Freq_Gate_TAxCTL = TASSEL__SMCLK + ID_0 + MC__STOP;
+    Freq_Gate_TAxCCR0 = 40000;
 }
 void FreqInit()
 {
@@ -52,27 +60,22 @@ void FreqInit()
 #else
     P1IES &= ~BIT6; //TA1CLK
 #endif
-    Freq_Counter_TAxCTL = TASSEL__TACLK + ID_0 + MC__STOP + TACLR;
-    Freq_Gate_TAxCTL = TASSEL__SMCLK + ID_0 + MC__STOP + TACLR;
+
+    Freq_Counter_TAxCTL = TASSEL__TACLK + ID_0 + MC__STOP;
+    Freq_Gate_TAxCTL = TASSEL__SMCLK + ID_0 + MC__STOP;
+    Freq_Gate_TAxCCR0 = 40000;
 }
 void CalculateFreq()
 {
     uint32_t Count = CounterOverflow;
-    uint32_t Gate = GateStartOV - GateOverflow;
+    uint32_t Gate = GateStartOV - GateOverflow + 1;
     Count <<= 16;
     Count += (uint32_t)(Freq_Counter_TAxR) + 2;
-    Gate <<= 16;
-    Gate |= Freq_Gate_TAxR;
-    Gate *= 4 * MHz;
-    FreqResult = ((double)Gate * (double)(4 * Mhz)) / (double)Count;
-    if (FreqCallback != nullptr)
-    {
-        FreqCallback(FreqResult);
-    }
-    else
-    {
-        FreqReady = 1;
-    }
+    Gate *= 40000;
+    Gate += Freq_Gate_TAxR ;
+    
+    FreqResult = (double)Count * ((double)(4000000L) / (double)Gate  ) ;
+        Freq_Flag = 1;
 }
 void FreqStart()
 {
@@ -101,12 +104,12 @@ inline void REAL_GATE_ISR()
         if (Freq_stage == 1)
         {
 #endif
-            Freq_Gate_TAxCTL = TASSEL__SMCLK + ID_0 + MC__STOP + TACLR; //GateStop
+            Freq_Gate_TAxCTL = TASSEL__SMCLK + ID_0 + MC__STOP; //GateStop
             Freq_stage = 0;
-            CalculateFreq();
 #if !CalcPWMPercent
-            FreqStart();
+            FreqStop();
 #endif
+            CalculateFreq();
 #if CalcPWMPercent
         }
         else if (Freq_stage == 2) //CALC
@@ -140,17 +143,13 @@ inline void REAL_GATE_ISR()
         else
         {
             Freq_Gate_TAxCTL = TASSEL__SMCLK + ID_0 + MC__STOP;
-
             uint32_t HighTime = 100 - GateStartOV;
             HighTime = HighTime << 16 + GateStartR;
             uint32_t totalTime = 100 - GateOverflow;
             totalTime = totalTime << 16 + Freq_Gate_TAxR;
-            double FreqPercent = (double)HighTime / (double)totalTime;
-            if (FreqPercentCallback)
-            {
-                FreqPercentCallback(FreqPercent);
-            }
-            FreqStart();
+            Freq_Percent = (double)HighTime / (double)totalTime;
+            FreqStop();
+            Freq_Percent_Flag = 1;
         }
 #endif
     }
@@ -161,30 +160,30 @@ inline void REAL_GATE_ISR()
 #else
         P1SEL |= BIT6;
 #endif                                                               //Stage 0. Start Counter
-        Freq_Counter_TAxCTL = TASSEL__TACLK + ID_0 + MC__UP + TACLR; //CounterStart.
+        Freq_Counter_TAxCTL = TASSEL__TACLK + ID_0 + TACLR + TAIE+ MC__CONTINUOUS; //CounterStart.
         GateStartOV = GateOverflow;
         GateStartR = Freq_Gate_TAxR;
         Freq_stage = 1;
     }
 }
-#pragma vector = Freq_Gate_TIMERx_A0_VECTOR
+#pragma vector = Freq_Gate_TIMERx_A1_VECTOR
 interrupt void GateISR()
 {
     if (!GateOverflow--) //4MHz, 1s
     {
-        Freq_Counter_TAxCTL = TASSEL__TACLK + ID_0 + MC__STOP + TACLR; //BIC TAIE, TAIFG, MC__Stop
+        Freq_Counter_TAxCTL = TASSEL__TACLK + ID_0 + MC__STOP; //BIC TAIE, TAIFG, MC__Stop
 #if FREQ_PLUS_COUNTER_TIMER == TIMER_A2_BASE
         P2SEL &= ~BIT2; //Move Operation to P2 ISR
         P2IE |= BIT2;   //BIS P2.2 IE
 #else
-        P1SEL &= ~BIT1;
+        P1SEL &= ~BIT6;
         P1IE |= BIT6; //BIS P1.6 IE
 #endif
     };
-    Freq_Gate_TAxCTL = TASSEL__SMCLK + ID_0 + MC__UP; //Clear TAIFG
+    Freq_Gate_TAxCTL = TASSEL__SMCLK + ID_0 + TAIE + MC__UP + TACLR; //Clear TAIFG
 }
 
-#pragma vector = Freq_Counter_TIMERx_A0_VECTOR
+#pragma vector = Freq_Counter_TIMERx_A1_VECTOR
 interrupt void CounterISR()
 {
     CounterOverflow++;
