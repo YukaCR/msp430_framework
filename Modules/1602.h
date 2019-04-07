@@ -31,9 +31,9 @@ void sleep_us(uint8_t r);
 void i2c_writeto(uint8_t, uint8_t);
 void printStr(char *dstr);
 void printChar(char ch);
-void printInt(uint8_t num);
+void printInt(uint32_t num);
 void printFloat(double num, uint8_t acc);
-char *itoa(int num, char *str, int radix);
+char *itoa(uint32_t num, char *str, int radix);
 void Delay1ms();
 uint8_t powInt(uint8_t x, uint8_t y);
 void ftoa(float f, char *str, uint8_t precision) {
@@ -93,6 +93,7 @@ void ftoa(float f, char *str, uint8_t precision) {
     }
   }
 }
+
 inline void sleep_us(uint8_t r)
 {
     while (r--)
@@ -119,7 +120,7 @@ void __init__(uint8_t LCD_Addr = 0x27, uint8_t LCD_cols = 16, uint8_t LCD_rows= 
     _cols = LCD_cols;
     _rows = LCD_rows;
     _backlightval = 0x08;
-    i2c_send_init(LCD_Addr,10);
+    i2c_send_init(LCD_Addr,40);
 }
 void begin(uint8_t cols, uint8_t lines, uint8_t dotsize)
 {
@@ -284,10 +285,9 @@ void printChar(char ch)
 {
     send(ch, 0x01);
 }
-void printInt(uint8_t num)
-{
-    char std[5] = {0,0,0,0,0};
-    printStr(itoa(num, std, 10));
+void printInt(uint32_t num){
+	char stdD[10];
+	printStr(itoa(num,stdD,10));
 }
 void printFloat(double num, uint8_t acc)
 {
@@ -304,7 +304,7 @@ uint8_t powInt(uint8_t x, uint8_t y)
     }
     return x;
 }
-char *itoa(int num, char *str, int radix)
+char *itoa(uint32_t num, char *str, int radix)
 { /*绱㈠紩琛�*/
     char index[] = "0123456789ABCDEF";
     unsigned unum; /*涓棿鍙橀噺*/

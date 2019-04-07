@@ -27,7 +27,7 @@ uint16_t SPWM_Current = 0;
 #if PWMFreq < 65
 #define Period 65535 //too low
 #else
-uint16_t Period = (uint16_t)((double)4000000L / (double)PWMFreq);
+uint16_t Period = (uint16_t)((double)4000000L / (double)PWMFreq) + 1;
 #endif
 #else
 #if PWMFreq < 195
@@ -49,6 +49,7 @@ void InitPWM(uint16_t PWM1_Value = 0, uint16_t PWM2_Value = 0)
 #if PWN_TAxBASE == TIMER_A2_BASE
     P2SEL |= BIT2 | BIT5 | BIT4;
     P2DIR |= BIT5 | BIT4;
+    P2REN |= BIT5 | BIT4;
     P5SEL |= BIT4 | BIT5 | BIT2 | BIT3;
 #endif
 #if Use4MHzCrystal
@@ -71,26 +72,33 @@ void InitPWM(uint16_t PWM1_Value = 0, uint16_t PWM2_Value = 0)
     PWM_TAxCCR2 = PWM1_Value;
 #if EnableSPWM
     PWM_TAxCTL |= MC__UPDOWN + TAIE + TACLR;
+#elif ENABLE_BUCK
+    PWM_TAxCTL |= MC__UP + TAIE + TACLR;
 #else
     PWM_TAxCTL |= MC__UP + TACLR;
 #endif
 }
 inline void InitPWMPercent(uint16_t PWM1Value = 0, uint16_t PWM2Value = 0)
 {
+#if EnablePercentOFF
+    return InitPWM((uint16_t)((PWM1Value + PWM_PercentOFF) * (double)Period / 100.0), (uint16_t)((PWM2Value+PWM_PercentOFF) * (double)Period / 100.0));
+    #else
     return InitPWM((uint16_t)(PWM1Value * (double)Period / 100.0), (uint16_t)(PWM2Value * (double)Period / 100.0));
+    #endif
 }
 inline void SetPWM1(uint16_t Value)
 {
     PWM_TAxCCR2 = Value;
 }
-void SetPWMFreq(uint16_t _PWMFreq){
-    double PWM1_PRECENT=PWM_TAxCCR2/PWM_TAxCCR0,PWM2_PRECENT=PWM_TAxCCR1/PWM_TAxCCR0;
-    #if Use4MHzCrystal
-        Period = 4*MHz / _PWMFreq;
-    #else
-        Period = 12*MHz / _PWMFreq;
-    #endif
-    PWM_TAxCTL &=~ MC_0;
+void SetPWMFreq(uint32_t _PWMFreq)
+{
+    double PWM1_PRECENT = (double)PWM_TAxCCR2 / (double)PWM_TAxCCR0, PWM2_PRECENT = (double)PWM_TAxCCR1 / (double)PWM_TAxCCR0;
+#if Use4MHzCrystal
+    Period = 4 * MHz / _PWMFreq;
+#else
+    Period = 12 * MHz / _PWMFreq;
+#endif
+    PWM_TAxCTL &= ~MC_0;
     PWM_TAxCCR0 = Period;
     PWM_TAxCCR1 = PWM2_PRECENT * Period;
     PWM_TAxCCR2 = PWM1_PRECENT * Period;
@@ -104,12 +112,20 @@ inline void SetPWM2(uint16_t Value)
 #endif
 inline void SetPWM1Persent(uint16_t Value)
 {
-    PWM_TAxCCR2 = (uint16_t)(Value * (double)Period / 100.0);
+#if EnablePercentOFF
+    PWM_TAxCCR2 = (uint16_t)((Value + PWM_PercentOFF) * (double)Period / 100.0);
+#else
+    PWM_TAxCCR2 = (uint16_t)((Value) * (double)Period / 100.0);
+#endif
 }
 #if EnablePWM2
 inline void SetPWM2Persent(uint16_t Value)
 {
-    PWM_TAxCCR1 = (uint16_t)(Value * (double)Period / 100.0);
+#if EnablePercentOFF
+    PWM_TAxCCR1 = (uint16_t)((Value + PWM_PercentOFF) * (double)Period / 100.0);
+#else
+    PWM_TAxCCR1 = (uint16_t)((Value) * (double)Period / 100.0);
+#endif
 }
 #endif
 #pragma vector = TIMER2_A0_VECTOR

@@ -32,12 +32,13 @@ void (*FreqCallback)(double) = nullptr;
 #if CalcPWMPercent
 void (*FreqPercentCallback)(double) = nullptr;
 #endif
-void FreqStop(){
+void FreqStop()
+{
 #if FREQ_PLUS_COUNTER_TIMER == TIMER_A2_BASE
-    P2SEL &=~ BIT2; //TA2CLK
+    P2SEL &= ~BIT2; //TA2CLK
 #else
-    P1SEL &=~ BIT6;  //TA1CLK
-    P1IE &=~ BIT6;  //TA1CLK
+    P1SEL &= ~BIT6; //TA1CLK
+    P1IE &= ~BIT6;  //TA1CLK
 #endif
     Freq_Counter_TAxCTL = TASSEL__TACLK + ID_0 + MC__STOP;
     Freq_Gate_TAxCTL = TASSEL__SMCLK + ID_0 + MC__STOP;
@@ -72,10 +73,12 @@ void CalculateFreq()
     Count <<= 16;
     Count += (uint32_t)(Freq_Counter_TAxR) + 2;
     Gate *= 40000;
-    Gate += Freq_Gate_TAxR ;
-    
-    FreqResult = (double)Count * ((double)(4000000L) / (double)Gate  ) ;
-        Freq_Flag = 1;
+    Gate += Freq_Gate_TAxR;
+
+    FreqResult = (double)Count * ((double)(4000000L) / (double)Gate);
+#if !CalcPWMPercent
+    Freq_Flag = 1;
+#endif
 }
 void FreqStart()
 {
@@ -105,27 +108,25 @@ inline void REAL_GATE_ISR()
         {
 #endif
             Freq_Gate_TAxCTL = TASSEL__SMCLK + ID_0 + MC__STOP; //GateStop
-            Freq_stage = 0;
 #if !CalcPWMPercent
+            Freq_stage = 0;
             FreqStop();
 #endif
             CalculateFreq();
-#if CalcPWMPercent
-        }
-        else if (Freq_stage == 2) //CALC
-        {
-#if FREQ_PLUS_COUNTER_TIMER == TIMER_A2_BASE
-            P2IES |= BIT2; //TA2CLK
-            P2IE |= BIT2;  //TA2CLK
-#else
-            P1IES |= BIT6;  //TA1CLK
-            P1IE |= BIT6;   //TA2CLK
-#endif
             GateOverflow = 100;
             GateStartOV = 0;
             GateStartR = 0;
             Freq_stage = 3;
-            Freq_Gate_TAxCTL = TASSEL__SMCLK + ID_0 + MC__UP + TACLR;
+            Freq_Gate_TAxCTL = TASSEL__SMCLK + ID_0 + MC__UP + TAIE + TACLR;
+#if CalcPWMPercent
+#if FREQ_PLUS_COUNTER_TIMER == TIMER_A2_BASE
+            P2IES |= BIT2; //TA2CLK
+            P2IE |= BIT2;  //TA2CLK
+#else
+            P1IES &=~ BIT6;  //TA1CLK
+            P1IFG = 0X00;
+            P1IE |= BIT6;   //TA2CLK
+#endif
         }
         else if (Freq_stage == 3)
         {
@@ -135,20 +136,23 @@ inline void REAL_GATE_ISR()
             P2IES &= ~BIT2; //TA2CLK
             P2IE |= BIT2;   //TA2CLK
 #else
-            P1IES &= ~BIT6; //TA1CLK
+            P1IES |= BIT6; //TA1CLK
+            P1IFG = 0X00;
             P1IE |= BIT6;   //TA2CLK
 #endif
             Freq_stage = 4;
         }
-        else
+        else if(Freq_stage = 4)
         {
             Freq_Gate_TAxCTL = TASSEL__SMCLK + ID_0 + MC__STOP;
             uint32_t HighTime = 100 - GateStartOV;
-            HighTime = HighTime << 16 + GateStartR;
+            HighTime = (HighTime << 16) + GateStartR;
             uint32_t totalTime = 100 - GateOverflow;
-            totalTime = totalTime << 16 + Freq_Gate_TAxR;
+            totalTime = (totalTime << 16) + Freq_Gate_TAxR;
             Freq_Percent = (double)HighTime / (double)totalTime;
+            Freq_Percent *= 100;
             FreqStop();
+            Freq_Flag = 1;
             Freq_Percent_Flag = 1;
         }
 #endif
@@ -159,8 +163,8 @@ inline void REAL_GATE_ISR()
         P2SEL |= BIT2;
 #else
         P1SEL |= BIT6;
-#endif                                                               //Stage 0. Start Counter
-        Freq_Counter_TAxCTL = TASSEL__TACLK + ID_0 + TACLR + TAIE+ MC__CONTINUOUS; //CounterStart.
+#endif                                                                              //Stage 0. Start Counter
+        Freq_Counter_TAxCTL = TASSEL__TACLK + ID_0 + TACLR + TAIE + MC__CONTINUOUS; //CounterStart.
         GateStartOV = GateOverflow;
         GateStartR = Freq_Gate_TAxR;
         Freq_stage = 1;
