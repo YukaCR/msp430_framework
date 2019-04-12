@@ -4,6 +4,7 @@
 #include <msp430.h>
 #define interrupt
 #define nullptr 0x00L
+#define __data20_write_long(x,y)
 #endif // !__VS_CODE_H__
 #endif // __VS_CODE__
 #ifndef __VS_CODE_H__
@@ -11,6 +12,24 @@
 #include <msp430.h>
 #include "TIDriver/UCS.h"
 #include <msp430f5xx_6xxgeneric.h>
+
+#define INT8_MAX                127
+#define INT16_MAX               32767
+#define INT32_MAX               2147483647L
+#define INT64_MAX               9223372036854775807LL
+
+/* Minimum of signed integral types.  */
+#define INT8_MIN                (-INT8_MAX - 1)
+#define INT16_MIN               (-INT16_MAX - 1)
+#define INT32_MIN               (-INT32_MAX - 1)
+#define INT64_MIN               (-INT64_MAX - 1)
+
+/* Maximum of unsigned integral types.  */
+#define UINT8_MAX               255U
+#define UINT16_MAX              65535U
+#define UINT32_MAX              4294967295UL
+#define UINT64_MAX              18446744073709551615ULL
+
 #define Mhz 1000000L
 #define XT1HFOFFG              (0x0004)       /* XT1 High Frequency Oscillator 1 Fault Flag */
 int _main();
@@ -86,6 +105,48 @@ void setupDCO(void)
       do
       {
     	  UCSCTL7 &= ~(XT2OFFG + XT1LFOFFG + XT1HFOFFG + DCOFFG);
+                                                // Clear XT2,XT1,DCO fault flags
+        SFRIFG1 &= ~OFIFG;                      // Clear fault flags
+      }
+      while (SFRIFG1&OFIFG);                    // Test oscillator fault flag
+
+
+}
+void burnDCO(void)
+{
+
+      /* Power settings */
+      SetVCoreUp(1u);
+      SetVCoreUp(2u);
+      SetVCoreUp(3u);
+      //SetVCoreUp(4u);
+      //SetVCoreUp(5u);
+
+
+      UCSCTL3 = SELREF__REFOCLK;    // select REFO as FLL source
+      UCSCTL6 = XT1OFF | XT2OFF;    // turn off XT1 and XT2
+
+      /* Initialize DCO to 25.00MHz */
+      __bis_SR_register(SCG0);                  // Disable the FLL control loop
+      UCSCTL0 = 0x0000u;                        // Set lowest possible DCOx, MODx
+      UCSCTL1 = DCORSEL_6;                      // Set RSELx for DCO = 50 MHz
+      UCSCTL2 = 1023u;                            // Set DCO Multiplier for 33.78MHz
+                                                // (N + 1) * FLLRef = Fdco
+                                                // (1023 + 1) * 32768 = 33.78MHz
+      UCSCTL4 = SELA__REFOCLK | SELS__DCOCLK | SELM__DCOCLK;
+      __bic_SR_register(SCG0);                  // Enable the FLL control loop
+
+      // Worst-case settling time for the DCO when the DCO range bits have been
+      // changed is n x 32 x 32 x f_MCLK / f_FLL_reference. See UCS chapter in 5xx
+      // UG for optimization.
+      // 32*32*25MHz/32768Hz = 781250 = MCLK cycles for DCO to settle
+      __delay_cycles(1062500u);
+
+
+      /* Loop until XT1,XT2 & DCO fault flag is cleared */
+      do
+      {
+        UCSCTL7 &= ~(XT2OFFG + XT1LFOFFG + XT1HFOFFG + DCOFFG);
                                                 // Clear XT2,XT1,DCO fault flags
         SFRIFG1 &= ~OFIFG;                      // Clear fault flags
       }

@@ -1,15 +1,45 @@
 #include "vscode.h"
 #include <msp430.h>
+#include "profile.h"
 #include "Modules/Freq+.h"
-#include "Modules/PWM.h"
 #include "Modules/ButtonMartix.h"
 #include "Modules/adc_sch.h"
+#include <assert.h>
+//#include "buck.h"
 #include "Modules/1602.h"
-#include "profile_int.h"
+#include "Modules/MPY32.h"
 int8_t PWMPercent = 50;
 int8_t DCPercent = 50;
 int32_t PWMFreq_ = 1000;
 double Div = 2.0;
+#include "Modules/FP_PID.h"
+#include "Modules/Q15.h"
+#include "Modules/PWM_Burn.h"
+float Kp=1, Ki=0.5, Kd=0.1, Hz=10;
+int output_bits = 16;
+bool output_signed = false;
+
+#include "profile_int.h"
+int main(){
+    uint16_t p_w = 0xff,p_st = 0;
+    volatile uint16_t pwhw;
+    volatile uint16_t pws;
+    volatile float d_data = 0;
+    burnDCO();
+    ADC12_init();
+    SetupMPYTriger();
+    InitPWMPercent(50,50);
+    IncPIDInit();
+    while(1){
+        
+    }
+}
+
+#if 0
+#pragma vector = TIMER2_A1_VECTOR
+interrupt void T(){
+    __no_operation();
+}
 inline void ButtonISR(uint8_t key)
 {
     switch (key)
@@ -99,3 +129,4 @@ int main()
         }
     }
 }
+#endif

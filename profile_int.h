@@ -3,6 +3,9 @@
 #include "profile.h"
 #include "vscode.h"
 #pragma vector = PORT1_VECTOR
+#define UCP_INIT 500
+int16_t ucp = UCP_INIT;
+
 interrupt void P1_ISR()
 {
     uint8_t _P1IFG = P1IFG;
@@ -44,28 +47,47 @@ interrupt void P2_ISR()
     }
     P2IFG = 0X00;
 }
+uint16_t ADC_DC_Val_10 = 0;
+uint32_t ADC_DC_Val = 0;
+uint8_t ADC_NUM = 0;
 #ifdef __ADC_SCH_H__
 #pragma vector = ADC12_VECTOR
 interrupt void ADC12_ISR()
 {
-    ADC12_SRV();
+#if ENABLE_VPP_DETECT
+    ((ADC12MEM0 > V_max) && (V_max = ADC12MEM0)) || (ADC12MEM0 < V_min) && (V_min = ADC12MEM0);
+#endif
+#if ENABLE_VDC_DETECT
+    ADC_DC_Val += ADC12MEM0;
+    ADC_NUM = ADC_NUM + 1;
+#endif
+    ADC12CTL0 |= ADC12SC;
     ADC12IFG = 0X00;
 }
+#define MAX_SAMPLE_RES 10
+int16_t Max_Sample = MAX_SAMPLE_RES;
+int16_t proc = 400;
 #endif // __ADC_SCH_H__
-#if defined(PWM_H) && defined(BUCK_H)
-uint8_t sec = 50;
 #pragma vector = PWM_TIMERx_A1_VECTOR
 interrupt void PWM_A1_ISR()
 {
-    if (ADC12_SCH_MEM > (BUCK_INV + BUCK_INVC))
+#if ENABLE_VDC_DETECT
+    ADC_DC_Val_10 += ADC_DC_Val;
+    if (!--Max_Sample)
     {
-        SetPWM2Persent(--sec);
+        __disable_interrupt();
+        ADC_DC_Val = ADC_DC_Val_10 / ADC_NUM;
+        proc += IncPIDCalc(ADC_DC_Val);
+        if(proc>800)proc=800;
+        if(proc<0)proc=0;
+        //SetPWM2(proc);
+        ADC_DC_Val_10 = 0;
+        Max_Sample = MAX_SAMPLE_RES;
+        ADC_NUM = 0;
+        TA2CTL &= ~TAIFG;
+        __enable_interrupt();
     }
-    else if (ADC12_SCH_MEM < (BUCK_INV - BUCK_INVC))
-    {
-        SetPWM2Persent(++sec);
-    }
-    TA2CTL &=~ TAIFG;
-}
+    ADC_DC_Val = 0;
 #endif
+}
 #endif // !_PROFILE_H_

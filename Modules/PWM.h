@@ -1,5 +1,9 @@
 #ifndef PWM_H
 #define PWM_H
+#define PWM_RR_C
+#ifdef PWM_BR_C
+#warning "PWM_Burn.h don't include another PWM.H if something wrong(x"
+#endif
 #include <msp430.h>
 #include "../TIDriver/timer_a.h"
 #include "../TIDriver/ucs.h"
@@ -49,7 +53,7 @@ void InitPWM(uint16_t PWM1_Value = 0, uint16_t PWM2_Value = 0)
 #if PWN_TAxBASE == TIMER_A2_BASE
     P2SEL |= BIT2 | BIT5 | BIT4;
     P2DIR |= BIT5 | BIT4;
-    P2REN |= BIT5 | BIT4;
+    P2DS |= BIT3 + BIT4;
     P5SEL |= BIT4 | BIT5 | BIT2 | BIT3;
 #endif
 #if Use4MHzCrystal

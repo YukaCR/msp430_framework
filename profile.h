@@ -4,10 +4,11 @@
 #define FREQ_PLUS_COUNTER_TIMER TIMER_A1_BASE
 #define ENABLE_PWN 1
 #define Mhz 1000000L
-#define EnableButtonMartix 1
+#define EnableButtonMartix 0
 //ADC_SCH.h
 #if defined(__ADC_SCH_H__)
-#define ENABLE_VPP_DETECT 1
+#define ENABLE_VDC_DETECT 1
+#define ENABLE_VPP_DETECT 0
 #define ENABLE_VRMS_DETECT 0
 #define ADC12_SCH_MCTL ADC12MCTL0
 #define ADC12_SCH_MEM ADC12MEM0
@@ -16,12 +17,12 @@
 #endif // DEBUG
 //PWM.h
 #if defined(PWM_H)
-#define ENABLE_BUCK 0
-#define BUCK_INV 1472
-#define BUCK_INVC 20
+#define ENABLE_BUCK 1
+#define BUCK_INV 1522
+#define BUCK_INVC 10
 #ifndef _PROFILE_PWN_H_
 #define _PROFILE_PWN_H_
-#define PWM_PercentOFF 14.4 //40k
+#define PWM_PercentOFF 0 //40k
 #define EnablePercentOFF ENABLE_BUCK
 #define PWN_TAxBASE TIMER_A2_BASE
 #define PWM_TAxCTL TA2CTL     /* Timer2_A3 Control */
@@ -37,9 +38,9 @@
 #define PWM_TIMERx_A0_VECTOR TIMER2_A0_VECTOR
 #define PWM_TIMERx_A1_VECTOR TIMER2_A1_VECTOR
 #define Use4MHzCrystal 1
-#define PWM1MODE OUTMOD_6 //OUTMOD_6 || OUTMOD_2(REVERSE)
+#define PWM1MODE OUTMOD_2 //OUTMOD_6 || OUTMOD_2(REVERSE)
 #define EnablePWM2 1
-#define PWM2MODE OUTMOD_6 //OUTMOD_6 || OUTMOD_2(REVERSE)
+#define PWM2MODE OUTMOD_2 //OUTMOD_6 || OUTMOD_2(REVERSE)
 #if ENABLE_BUCK
 #define PWMFreq 40000L
 #else
