@@ -1,0 +1,19 @@
+//launch.json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "MSP430 Debug",
+            "type": "gdb",
+            "request": "launch",
+            "target": "/home/yukacr/Workspace/msp430_framework/main.elf",
+            "autorun": [
+                "set height 0",
+                "dir /home/yukacr/ti-cgt-msp430_18.12.1.LTS/lib/src",
+                "target remote 127.0.0.1:2000"
+            ],
+            "cwd": "${workspaceRoot}",
+            "gdbpath": "/usr/bin/msp430-elf-gdb"
+        }
+    ]
+}
