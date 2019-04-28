@@ -10,7 +10,8 @@
 #ifndef __VS_CODE_H__
 #define __VS_CODE_H__
 #include <msp430.h>
-#include "TIDriver/UCS.h"
+#include "intrinsics.h"
+#include "TIDriver/ucs.h"
 #include <msp430f5xx_6xxgeneric.h>
 
 #define INT8_MAX                127

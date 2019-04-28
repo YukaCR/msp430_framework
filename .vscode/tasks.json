@@ -1,0 +1,37 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Complie",
+            "type": "shell",
+            "command": "/home/yukacr/ti-cgt-msp430_18.12.1.LTS/bin/cl430",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "args": [
+                "--define=__MSP430F5529__",
+                "-I/home/yukacr/ti-cgt-msp430_18.12.1.LTS/msp430_lib/include/",
+                "-I/home/yukacr/ti-cgt-msp430_18.12.1.LTS/include/",
+                "-I/home/yukacr/Workspace/msp430_framework/",
+                "-I/home/yukacr/ti-cgt-msp430_18.12.1.LTS/lib/",
+                "--silicon_version=mspx",
+                "-ggdb",
+                "TIDriver/ucs.c","main.cpp",
+                "-z",
+                "-m", "/home/yukacr/Workspace/msp430_framework/Link_result.txt", "lnk_msp430f5529.cmd", 
+                "-o", "main.elf"
+            ]
+        },
+        {
+            "label":"DebugProxy",
+            "type": "shell",
+            "command":"/usr/bin/mspdebug --allow-fw-update tilib \"prog /home/yukacr/Workspace/msp430_framework/main.elf\" gdb"
+        }
+    ]
+}

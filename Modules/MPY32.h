@@ -1,6 +1,6 @@
 #ifndef MPY32_H
 #define MPY32_H
-#include <MSP430.h>
+#include <msp430.h>
 #include "vscode.h"
 bool MPY_BUSY = 0;
 uint8_t MPY_STATUS = 0;
