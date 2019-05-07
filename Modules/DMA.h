@@ -15,10 +15,11 @@ void SetupMPYTriger(){
   DMA0CTL = DMADT_4+DMAEN+DMADSTINCR_3; // Rpt single tranfer, inc dst, Int
   __data20_write_long((uintptr_t) &DMA0SA,(uintptr_t) &RESLO);
   __data20_write_long((uintptr_t) &DMA0DA,(uintptr_t) &MPY32_RESULT);
-  DMA0SZ = 4;                               // DMA0 size = 1
+  DMA0SZ = 1;                               // DMA0 size = 1
   __enable_interrupt();
 }
-
+#define DisableMPYTriger DMA0CTL &=~ DMAEN;
+#define EnableMPYTriger DMA0CTL |= DMAEN;
 #pragma vector = DMA_VECTOR
 interrupt void DMA_ISR(){
     if(DMAIV == DMAIV_DMA0IFG){

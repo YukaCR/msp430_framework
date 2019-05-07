@@ -2,6 +2,7 @@
 #define __Profile_H__
 #include "profile.h"
 #include "vscode.h"
+#include "intrinsics.h"
 #pragma vector = PORT1_VECTOR
 #define UCP_INIT 500
 int16_t ucp = UCP_INIT;
@@ -54,6 +55,14 @@ uint8_t ADC_NUM = 0;
 #pragma vector = ADC12_VECTOR
 interrupt void ADC12_ISR()
 {
+    if(!ADCFlag){
+        ADCFlag = 1;
+        ADC12CTL0 |= ADC12SC;
+    }
+        ADC_DC_Val_10 += ADC12MEM0;
+        ADC_NUM ++;
+    ADC12IFG = 0X00;
+    #if 0
 #if ENABLE_VPP_DETECT
     ((ADC12MEM0 > V_max) && (V_max = ADC12MEM0)) || (ADC12MEM0 < V_min) && (V_min = ADC12MEM0);
 #endif
@@ -63,6 +72,7 @@ interrupt void ADC12_ISR()
 #endif
     ADC12CTL0 |= ADC12SC;
     ADC12IFG = 0X00;
+    #endif
 }
 #define MAX_SAMPLE_RES 10
 int16_t Max_Sample = MAX_SAMPLE_RES;
@@ -71,6 +81,7 @@ int16_t proc = 400;
 #pragma vector = PWM_TIMERx_A1_VECTOR
 interrupt void PWM_A1_ISR()
 {
+#if 0
 #if ENABLE_VDC_DETECT
     ADC_DC_Val_10 += ADC_DC_Val;
     if (!--Max_Sample)
@@ -88,6 +99,7 @@ interrupt void PWM_A1_ISR()
         __enable_interrupt();
     }
     ADC_DC_Val = 0;
+#endif
 #endif
 }
 #endif // !_PROFILE_H_

@@ -18,8 +18,8 @@
     P2.4 -> PWM2 out
 */
 #define Mhz 1000000L
-#define Peroid 800
-#define Peroid_10 8
+#define Peroid 1024
+#define Peroid_10 10
 void InitPWM(uint16_t PWM1_Value = 0, uint16_t PWM2_Value = 0)
 {
     //Fucking 5529 has a 4MHz Osc
@@ -41,7 +41,7 @@ void InitPWM(uint16_t PWM1_Value = 0, uint16_t PWM2_Value = 0)
     PWM_TAxCCTL1 = CM_0 + SCS + PWM2MODE + OUT;
     PWM_TAxCCR1 = PWM2_Value;
     PWM_TAxCCR2 = PWM1_Value;
-    PWM_TAxCTL |= MC__UP + TAIE + TACLR;
+    PWM_TAxCTL |= MC__UP + TACLR;
 }
 
 inline void InitPWMPercent(uint16_t PWM1Value = 0, uint16_t PWM2Value = 0)
@@ -54,6 +54,7 @@ inline void SetPWM1(uint16_t Value)
 }
 inline void SetPWM2(uint16_t Value)
 {
+    
     PWM_TAxCCR1 = Value;
 }
 inline void SetPWM1Persent(uint16_t Value)

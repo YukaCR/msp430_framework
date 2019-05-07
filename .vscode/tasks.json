@@ -22,16 +22,27 @@
                 "-I/home/yukacr/ti-cgt-msp430_18.12.1.LTS/lib/",
                 "--silicon_version=mspx",
                 "-ggdb",
-                "TIDriver/ucs.c","main.cpp",
+                "TIDriver/ucs.c",
+                "main.cpp",
                 "-z",
-                "-m", "/home/yukacr/Workspace/msp430_framework/Link_result.txt", "lnk_msp430f5529.cmd", 
-                "-o", "main.elf"
+                "-m",
+                "/home/yukacr/Workspace/msp430_framework/Link_result.txt",
+                "lnk_msp430f5529.cmd",
+                "-o",
+                "main.elf"
             ]
         },
         {
-            "label":"DebugProxy",
+            "label": "DebugProxy - Download",
             "type": "shell",
-            "command":"/usr/bin/mspdebug --allow-fw-update tilib \"prog /home/yukacr/Workspace/msp430_framework/main.elf\" gdb"
+            "command": "/usr/bin/mspdebug --allow-fw-update tilib \"prog /home/yukacr/Workspace/msp430_framework/main.elf\" gdb",
+            "problemMatcher": []
+        },
+        {
+            "label": "DebugProxy",
+            "type": "shell",
+            "command": "/usr/bin/mspdebug --allow-fw-update tilib gdb",
+            "problemMatcher": []
         }
     ]
 }

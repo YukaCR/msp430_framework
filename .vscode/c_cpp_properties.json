@@ -29,6 +29,8 @@
                 "UNICODE",
                 "_UNICODE",
                 "__MSP430F5529__",
+                "__MSP430X__",
+                "__VS_CODE__",
                 "ENERGIA",
                 "VS_CODE"
             ],

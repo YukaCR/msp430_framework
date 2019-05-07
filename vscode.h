@@ -1,6 +1,5 @@
 #ifdef __VS_CODE__
 #ifndef __VS_CODE_H__
-#include <stdint-gcc.h>
 #include <msp430.h>
 #define interrupt
 #define nullptr 0x00L
