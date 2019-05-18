@@ -21,7 +21,7 @@
 #define ArialBlack 2
 #define size8 0
 #define size16 1
-volatile unsigned char DisBuffer[250*16];
+unsigned char DisBuffer[250*16];
 
 const unsigned char TimesNewRoman8[]=
 {

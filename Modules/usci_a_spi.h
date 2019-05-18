@@ -1,4 +1,5 @@
 //USCI_A_API
+#define __USCI_A_SPI_H__
 #ifndef __USCI_A_SPI_H__
 #define __USCI_A_SPI_H__
 #include <msp430.h>

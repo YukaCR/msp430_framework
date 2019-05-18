@@ -12,7 +12,7 @@
 #define nDC_L 	P3OUT&=~BIT4
 #define nBUSY	P2IN & BIT2
 
-extern volatile unsigned char DisBuffer[250*16];
+extern unsigned char DisBuffer[250*16];
 
 void SPI4W_WRITECOM(unsigned char INIT_COM);
 void SPI4W_WRITEDATA(unsigned char INIT_DATA);
@@ -33,13 +33,13 @@ void closebump(void);
 void DisplayString(const char* str, unsigned int sx, unsigned int sy);
 void enterdeepsleep(void);
 void Init_buff(void);
-void SET_EYEONE(void);
+void SET_EYEONE(void);	
 void PaperIO_Int(void);
-void display(unsigned char *str, //×Ö·û´®
-             unsigned int xsize,  //x·½ÏòÎ»ÖÃ
-			 unsigned int ysize,  //y·½ÏòÎ»ÖÃ
-			 unsigned int font,   //×ÖÌå 0,1,2
-			 unsigned int size,   //×ÖºÅ 0,1
-			 unsigned int reverse,//·´ÏÔ 0 Õý³£ÏÔÊ¾£¬ 1 ·´ÏÔ
-			 unsigned int fresh   //Á¢¼´Ë¢ÐÂ
+void display(unsigned char *str, //ï¿½Ö·ï¿½ï¿½ï¿½
+             unsigned int xsize,  //xï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
+			 unsigned int ysize,  //yï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
+			 unsigned int font,   //ï¿½ï¿½ï¿½ï¿½ 0,1,2
+			 unsigned int size,   //ï¿½Öºï¿½ 0,1
+			 unsigned int reverse,//ï¿½ï¿½ï¿½ï¿½ 0 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ 1 ï¿½ï¿½ï¿½ï¿½
+			 unsigned int fresh   //ï¿½ï¿½ï¿½ï¿½Ë¢ï¿½ï¿½
 			 );

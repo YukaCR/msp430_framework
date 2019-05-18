@@ -2,13 +2,13 @@
 #include "Include.h"
 #include "Paper_Display.h"
 
-#define DELAY_TIME	50    // Í¼Æ¬ÏÔÊ¾ÍêÍ£ÁôÊ±¼ä(µ¥Î»:Ãë)
-// ²âÊÔÍ¼
-#define PIC_WHITE                   255  // È«°×
-#define PIC_BLACK                   254  // È«ºÚ
-#define PIC_Orientation             253  // ·½ÏòÍ¼
-#define PIC_LEFT_BLACK_RIGHT_WHITE  249  // ×óºÚÓÒ°×
-#define PIC_UP_BLACK_DOWN_WHITE     248  // ÉÏºÚÏÂ°×
+#define DELAY_TIME	50    // Í¼Æ¬ï¿½ï¿½Ê¾ï¿½ï¿½Í£ï¿½ï¿½Ê±ï¿½ï¿½(ï¿½ï¿½Î»:ï¿½ï¿½)
+// ï¿½ï¿½ï¿½ï¿½Í¼
+#define PIC_WHITE                   255  // È«ï¿½ï¿½
+#define PIC_BLACK                   254  // È«ï¿½ï¿½
+#define PIC_Orientation             253  // ï¿½ï¿½ï¿½ï¿½Í¼
+#define PIC_LEFT_BLACK_RIGHT_WHITE  249  // ï¿½ï¿½ï¿½ï¿½Ò°ï¿½
+#define PIC_UP_BLACK_DOWN_WHITE     248  // ï¿½Ïºï¿½ï¿½Â°ï¿½
 
 const unsigned char init_data[]={
 		0x50,0xAA,0x55,0xAA,0x55,0xAA,0x11,0x00,0x00,0x00,
@@ -82,14 +82,14 @@ void INIT_SSD1673()
 	//    SPI4W_WRITEDATA(0x30);    // GS0-->GS0
 	//    SPI4W_WRITEDATA(0x31);    // GS0-->GS1
 	//    SPI4W_WRITEDATA(0x32);    // GS1-->GS0
-	SPI4W_WRITEDATA(0x33);    // GS1-->GS1  ¿ª»úµÚÒ»´ÎË¢ÐÂBorder´Ó°×µ½°×
+	SPI4W_WRITEDATA(0x33);    // GS1-->GS1  ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½Ë¢ï¿½ï¿½Borderï¿½Ó°×µï¿½ï¿½ï¿½
 	//    SPI4W_WRITEDATA(0x43);    // VBD-->VSS
 	//    SPI4W_WRITEDATA(0x53);    // VBD-->VSH
 	//    SPI4W_WRITEDATA(0x63);    // VBD-->VSL
 	//    SPI4W_WRITEDATA(0x73);    // VBD-->HiZ
 
 	SPI4W_WRITECOM(0x11);	      // Data Entry mode
-	SPI4W_WRITEDATA(0x01);    // 01 ¨CY decrement, X increment
+	SPI4W_WRITEDATA(0x01);    // 01 ï¿½CY decrement, X increment
 	SPI4W_WRITECOM(0x44);       // set RAM x address start/end, in page 22
 	SPI4W_WRITEDATA(0x00);    // RAM x address start at 00h;
 	SPI4W_WRITEDATA(0x0f);    // RAM x address end at 0fh(15+1)*8->128    2D13
@@ -107,13 +107,13 @@ void INIT_SSD1673()
 
 	WRITE_LUT();
 	SPI4W_WRITECOM(0x21);       // Option for Display Update
-	SPI4W_WRITEDATA(0x83);    // A[7]=1(Enable bypass)  A[4]=0È«ºÚ(value will be used as for bypass)
-	DIS_IMG(PIC_WHITE);         // È«ºÚµ½È«°×ÇåÆÁ£¬ÕâÑù¿É·ÀÖ¹¿ª»ú³öÏÖ»¨ÆÁµÄÎÊÌâ
+	SPI4W_WRITEDATA(0x83);    // A[7]=1(Enable bypass)  A[4]=0È«ï¿½ï¿½(value will be used as for bypass)
+	DIS_IMG(PIC_WHITE);         // È«ï¿½Úµï¿½È«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É·ï¿½Ö¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 	SPI4W_WRITECOM(0x21);       //
-	SPI4W_WRITEDATA(0x03);    // ºóÃæË¢ÐÂ»Ö¸´Õý³£µÄÇ°ºó2·ùÍ¼±È½Ï
+	SPI4W_WRITEDATA(0x03);    // ï¿½ï¿½ï¿½ï¿½Ë¢ï¿½Â»Ö¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½2ï¿½ï¿½Í¼ï¿½È½ï¿½
 	SPI4W_WRITECOM(0x3C);       // Select border waveform for VBD
-	SPI4W_WRITEDATA(0x73);    // VBD-->HiZ  ºóÃæË¢ÐÂÊ±Border¶¼ÊÇ¸ß×è
+	SPI4W_WRITEDATA(0x73);    // VBD-->HiZ  ï¿½ï¿½ï¿½ï¿½Ë¢ï¿½ï¿½Ê±Borderï¿½ï¿½ï¿½Ç¸ï¿½ï¿½ï¿½
 
 }
 
@@ -128,15 +128,12 @@ void WRITE_LUT()
 void Init_buff(void)
 {
 	int i;
-	for(i=0;i<4000;i++)
-	{
-		DisBuffer[i]=gImage_logo[i];
-	}
+	memcpy(DisBuffer,gImage_logo,4000);
 
 }
 
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-//xx   Í¼Æ¬ÏÔÊ¾º¯Êý    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+//xx   Í¼Æ¬ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 void DIS_IMG(unsigned char num)
 {
@@ -151,10 +148,10 @@ void DIS_IMG(unsigned char num)
   DELAY_S(5);
   SPI4W_WRITECOM(0x24);
   DELAY_S(5);
-  pcnt = 0;                 // ¸´Î»»ò±£´æÌáÊ¾×Ö½ÚÐòºÅ
-  for(col=0; col<250; col++)   // ×Ü¹²250 GATEÁÐ  // send 128x250bits ram 2D13
+  pcnt = 0;                 // ï¿½ï¿½Î»ï¿½ò±£´ï¿½ï¿½ï¿½Ê¾ï¿½Ö½ï¿½ï¿½ï¿½ï¿½
+  for(col=0; col<250; col++)   // ï¿½Ü¹ï¿½250 GATEï¿½ï¿½  // send 128x250bits ram 2D13
   {
-    for(row=0; row<16; row++)  // ×Ü¹²128 SOURCEÐÐ£¬Ã¿¸öÏñËØ1bit,¼´ 128/8=16 ×Ö½Ú
+    for(row=0; row<16; row++)  // ï¿½Ü¹ï¿½128 SOURCEï¿½Ð£ï¿½Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½1bit,ï¿½ï¿½ 128/8=16 ï¿½Ö½ï¿½
     {
       switch (num)
       {
@@ -257,28 +254,28 @@ void SPI4W_WRITEDATA(unsigned char INIT_DATA)
 }
 
 unsigned char FontSize[]={16,32};
-void display(unsigned char *str, //×Ö·û´®
-             unsigned int xsize,  //x·½ÏòÎ»ÖÃ
-			 unsigned int ysize,  //y·½ÏòÎ»ÖÃ
-			 unsigned int font,   //×ÖÌå 0,1,2
-			 unsigned int size,   //×ÖºÅ 0,1
-			 unsigned int reverse,//·´ÏÔ 0 Õý³£ÏÔÊ¾£¬ 1 ·´ÏÔ
-			 unsigned int fresh   //Á¢¼´Ë¢ÐÂ
+void display(unsigned char *str, //ï¿½Ö·ï¿½ï¿½ï¿½
+             unsigned int xsize,  //xï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
+			 unsigned int ysize,  //yï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
+			 unsigned int font,   //ï¿½ï¿½ï¿½ï¿½ 0,1,2
+			 unsigned int size,   //ï¿½Öºï¿½ 0,1
+			 unsigned int reverse,//ï¿½ï¿½ï¿½ï¿½ 0 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ 1 ï¿½ï¿½ï¿½ï¿½
+			 unsigned int fresh   //ï¿½ï¿½ï¿½ï¿½Ë¢ï¿½ï¿½
 			 )
 {
     unsigned char i,j,k;
 	unsigned char *zimoPoint;
 	unsigned char zimoW;
 	unsigned char zimoH;
-	unsigned char moveBytes;  //ÒÆ¶¯×Ö½ÚÊý
-	unsigned char moveBits;   //ÒÆ¶¯Î»Êý
+	unsigned char moveBytes;  //ï¿½Æ¶ï¿½ï¿½Ö½ï¿½ï¿½ï¿½
+	unsigned char moveBits;   //ï¿½Æ¶ï¿½Î»ï¿½ï¿½
 	volatile unsigned char zimoBufferTemp[6];
 
-	zimoW=FontSize[size]/2;	  //xÏòÐÐÊý
-	zimoH=FontSize[size]/8;	  //yÏò×Ö½ÚÊý
+	zimoW=FontSize[size]/2;	  //xï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	zimoH=FontSize[size]/8;	  //yï¿½ï¿½ï¿½Ö½ï¿½ï¿½ï¿½
 
 	moveBits=ysize%8;
-	if((moveBits)!=0) //·ÇÍêÕû×Ö½Ú´¦Àí
+	if((moveBits)!=0) //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö½Ú´ï¿½ï¿½ï¿½
 	{
 		moveBytes=zimoH+1;
 	}
@@ -288,10 +285,10 @@ void display(unsigned char *str, //×Ö·û´®
 	{
 	   if((font==TimesNewRoman) && (size==size8)) zimoPoint=(unsigned char *)&TimesNewRoman8;
 	   else if((font==TimesNewRoman) && (size==size16)) zimoPoint=(unsigned char *)&TimesNewRoman16;
-	   zimoPoint=zimoPoint+((*str)-0x20)*zimoW*zimoH;     //Ö¸Ïò×Ö·û×ÖÄ£µÄ¿ªÊ¼µØÖ·¡£
+	   zimoPoint=zimoPoint+((*str)-0x20)*zimoW*zimoH;     //Ö¸ï¿½ï¿½ï¿½Ö·ï¿½ï¿½ï¿½Ä£ï¿½Ä¿ï¿½Ê¼ï¿½ï¿½Ö·ï¿½ï¿½
 	   for(i=0;i<zimoW;i++)
 	   {
-			//¶Á³ö×ÖÄ£Ò»ÁÐÊý¾Ý
+			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 			for(j=0;j<6;j++) zimoBufferTemp[j]=0;
 			if(reverse==0)
 			{
@@ -307,7 +304,7 @@ void display(unsigned char *str, //×Ö·û´®
 					zimoBufferTemp[j]=(*(zimoPoint+i+j*zimoW));
 				}
 			}
-			//×ÖÄ£Ò»ÁÐÊý¾ÝÒÆÎ»²Ù×÷
+			//ï¿½ï¿½Ä£Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½
 			if (moveBits==0);
 			else
 			{
@@ -321,7 +318,7 @@ void display(unsigned char *str, //×Ö·û´®
 					zimoBufferTemp[0]=zimoBufferTemp[0]>>1;
 				}
 			}
-			//DisBuffer´¦Àí
+			//DisBufferï¿½ï¿½ï¿½ï¿½
 			if (moveBits==0);
 			else
 			{
@@ -331,7 +328,7 @@ void display(unsigned char *str, //×Ö·û´®
 				zimoBufferTemp[0]=zimoBufferTemp[0] | (DisBuffer[(xsize+i)*16+(ysize/8)] & k);
 
 			}
-			//¸üÐÂ DisBuffer
+			//ï¿½ï¿½ï¿½ï¿½ DisBuffer
 			for(j=0;j<moveBytes;j++)
 			{
 			    DisBuffer[(xsize+i)*16+((ysize/8)+j)]=zimoBufferTemp[j];

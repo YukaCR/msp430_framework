@@ -2,9 +2,10 @@
 #define __OLEDFONT_H 	
 #include <msp430.h>
 #include	<in430.h>
+#include "stdint.h"
 #include	<intrinsics.h>
 
- uint8_t const  F6x8[92][6] =
+const uint8_t  F6x8[92][6] =
 {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,// sp - 32
 0x00, 0x00, 0x00, 0x2f, 0x00, 0x00,// !

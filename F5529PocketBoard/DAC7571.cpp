@@ -4,7 +4,7 @@
  *  Created on: 2014-7-15
  *      Author: dean
  */
-#include "dac7571.h"
+#include "DAC7571.h"
 void DACValue(unsigned int Value)
 {
 	unsigned char i,j;

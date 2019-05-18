@@ -4,7 +4,7 @@
  *  Created on: 2014-7-15
  *      Author: dean
  */
-#include "captouch.h"
+#include "Captouch.h"
 #include <msp430.h>
 
 const GPIO_TypeDef GPIO3 =
@@ -28,7 +28,7 @@ const GPIO_TypeDef* LED_GPIO[2] = {&GPIO7, &GPIO6};
 const uint8_t LED_PORT[2] = {BIT4, BIT3};
 void initCapTouch()
 {
-  //Vref¼Óµ½+¼«
+  //Vrefï¿½Óµï¿½+ï¿½ï¿½
   CBCTL2 = CBREF14+CBREF13+CBREF02;
   CBCTL1 = CBON + CBF;
   CBCTL2 |= CBRS_1;
@@ -40,7 +40,7 @@ uint16_t CapTouch_ReadChannel(int i)
   uint16_t cpu_cnt = 0;
   uint16_t osc_cnt = 0;
 
-  CBCTL0 = CBIMEN + (i << 8); //Íâ²¿ÐÅºÅ¼Óµ½¸º¼«
+  CBCTL0 = CBIMEN + (i << 8); //ï¿½â²¿ï¿½ÅºÅ¼Óµï¿½ï¿½ï¿½ï¿½ï¿½
   P6OUT &= ~ALL_PORT;
   P6DIR |= ALL_PORT & ~(1 << i);
   CBCTL3 = 1 << i;
@@ -49,7 +49,7 @@ uint16_t CapTouch_ReadChannel(int i)
 
   while(1)
   {
-    if(CBCTL1 & CBOUT) 			//¿ØÖÆµçÈÝµÄ³ä·Åµç
+    if(CBCTL1 & CBOUT) 			//ï¿½ï¿½ï¿½Æµï¿½ï¿½ÝµÄ³ï¿½Åµï¿½
       P6OUT |= ALL_PORT;
     else
       P6OUT &= ~ALL_PORT;
@@ -63,7 +63,7 @@ uint16_t CapTouch_ReadChannel(int i)
     if(osc_cnt >= OSC_CYCLES)
       break;
 
-    cpu_cnt++;					//¼ÆËãÆµÂÊ
+    cpu_cnt++;					//ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½
   }
 
   //_LCRIT(gie);
