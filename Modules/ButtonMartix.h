@@ -10,7 +10,7 @@
  * '4':8   '5':9  '6':10 'B':11
  * '1':12  '2':13 '3':14 'A':15
 */
-
+#warning "Timer A0 was used to ButtonMartix"
 uint8_t KeyValue = 0;
 char KeyCode = 0;
 char KeyTable[]={
@@ -33,6 +33,8 @@ void Setup_Button_Martix()
     P1IES |= (BIT2 + BIT3 + BIT4 + BIT5);
     P1REN |= (BIT2 + BIT3 + BIT4 + BIT5); //enable pullup
     P1IE |= (BIT2 + BIT3 + BIT4 + BIT5);
+
+    TA0CTL = TASSEL__SMCLK + ID_3 + MC__CONTINUOUS + TACLR;
 }
 void Button_Martix_ISR(uint8_t _P1IFG)
 {
@@ -45,8 +47,6 @@ void Button_Martix_ISR(uint8_t _P1IFG)
         P1IES |= (BIT2 + BIT3 + BIT4 + BIT5);
         P1IFG = 0X00;
         __enable_interrupt();
-        UCA0IFG &= ~UCTXIFG;
-        UCA0IFG |= UCTXIFG;
         return;
     }
     do
@@ -108,8 +108,6 @@ void Button_Martix_ISR(uint8_t _P1IFG)
     P1IES &= ~(BIT2 + BIT3 + BIT4 + BIT5);
     P1IFG = 0X00;
     __enable_interrupt();
-    UCA0IFG &= ~UCTXIFG;
-    UCA0IFG |= UCTXIFG;
 }
 #pragma vector = PORT1_VECTOR
 interrupt void P1_ISR()

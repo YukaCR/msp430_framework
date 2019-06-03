@@ -1,152 +1,278 @@
-#include "msp430.h"
+#include <msp430.h>
 #include "vscode.h"
-#include "Modules_Rebuild/DAC7612U.h"
+#include "math.h"
+#include "Modules/PWM_Burn.h"
+#include "Modules_Rebuild/ADC_EV_DMA.h"
+#include "Modules_Rebuild/SPWM_int.h"
+#include "Modules_Rebuild/Nokia5110.h"
 #include "Modules/ButtonMartix.h"
-#include "Modules_Rebuild/SSD1306.h"
-#include "stdlib.h"
-bool input_status = 0;
-uint32_t input_buffer = 0;
+#define Cac 5
+
+//status regs
+uint32_t ADC_EV_x_Result = 0;
+uint16_t ADC_Count = 0;
+bool DMA_ISR_SEND = 0;
+uint8_t avg = Cac;
+float avg_f = 0;
+float avg_v = 0;
+uint8_t AVG_RP_COUNT = 0;
+bool RMS_V_Meas = 0;
+
 uint8_t current_position = 0;
 bool Current_Selected_isAmpl = 0;
 bool dot_enabled = 0;
 uint8_t dot_position = 0;
-const char *kHz_Data[] = {" Hz", " kHz"};
+#define TB_C_MAX 3
+uint8_t TB_C = 0;
+
+
+//current sense
+int32_t ModRx = 0;
+//display layout
+/*
+*  Current:     mA 
+*  Voltage:      V
+*  Freqency:    Hz
+*  \InputArea
+*  NumberPad: input
+*  A,B: Step in/out
+*  C,D 
+*  *: Enter
+*  #: Switch/Cancel
+*/
+
+//display registers
+enum CurrentSelect_PT{
+    Current=0, Voltage, Freqency
+}Current_Select;
+float RMS_I;
+uint16_t RMS_V=0XFFFF;
+uint16_t Freq;
+bool input_status = 0;
+uint32_t input_buffer = 0;
+
+uint16_t ADC12MAX  = 0;
+
+int8_t FrequencyStep[2]=  {-1,1};
+void Update_UI();
+
+uint16_t settingCurrent = 1000  / 1.1;
+uint16_t sc_ov = 20;
+float CurrentModulation = 1;
 int main()
 {
-    Setup_DAC7612U_DDS();
-    Setup_SSD1306();
+    Setup_Nokia5110();
+    GFX_Fill(0x00);
+    Setup_SPWM();
+    InitPWM();
+    ADC12_EV_init();
     Setup_Button_Martix();
-    SSD1306_Clear();
-    GFX_WriteAt("A:Sin B:Squ C:Tri\n", 0, 0);
-    GFX_Write("D:Enter #:. *:^Cancel\n");
-    GFX_Write("Freq: 1.0 kHz\n");
-    GFX_Write("Ampl: 16.384 V\n");
-    GFX_InvertRow_Ranged(0, 2 * 6, 5 * 6);
-    GFX_InvertRow_Ranged(2, 6 * 6, 127);
+    TA0CTL |= TAIE;
+    GFX_Write("Current\n            mAVoltage\n             VFreqency    Hz\n");
+    Update_UI();
+    SPWM_Freq(50);
     while (1)
     {
-        if (Button_Flag)
+        if (DMA_ISR_SEND) //EV Calaculation
         {
-            switch (KeyCode)
+            float EV_Data = 0;
+            /*ADC_EV_x_Result *= 4;
+            ModRx *= 3;
+            EV_Data += ADC_EV_x_Result - ModRx;
+            EV_Data /= ADC_Count;
+            EV_Data = sqrtf(EV_Data);
+            EV_Data /= 4096;
+            EV_Data *= 3.3;*/
+            EV_Data = (float)ADC12MAX * 3.3  / 4096.0;
+            if(RMS_V_Meas){
+                avg_v = EV_Data;
+                ADC12MCTL0 = ADC12SREF_0 + ADC12INCH_3;
+                RMS_V_Meas =0;
+                AVG_RP_COUNT = 0;
+                GFX_WriteAt(avg_v,3,6);
+                if(Current_Select == Voltage){
+                    GFX_InvertRow_Ranged(3,6,78);
+                }
+                ADC12CTL0 |= ADC12ENC;
+                ADC12CTL0 |= ADC12SC;
+                continue;
+            }
+            if (avg--)
             {
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
+                avg_f += EV_Data;
+            }
+            else
+            {
+                avg_f += EV_Data;
+                avg = Cac;
+                RMS_I = avg_f / (float)(Cac + 1);
+                GFX_ClearRow_Ranged(1,6,72);
+                GFX_WriteAt(RMS_I*1100, 1, 6);
+                if(Current_Select == Current){
+                    GFX_InvertRow_Ranged(1,6,72);
+                }
+                avg_f = 0;
+                if(AVG_RP_COUNT > 30){
+                    RMS_V_Meas = true;
+                    ADC12MCTL0 = ADC12SREF_0 + ADC12INCH_2;
+                }
+            }
+            if(!(ADC12MAX < settingCurrent + sc_ov && ADC12MAX > settingCurrent - sc_ov)){
+                if(ADC12MAX < settingCurrent + sc_ov){
+                    SPWM_SetAmp(currentAmp+1);
+                }
+                else{
+                    SPWM_SetAmp(currentAmp-1);
+                }
+            }
+            ADC_Count = 0;
+            ADC_EV_x_Result = 0;
+            ModRx = 0;
+            DMA_ISR_SEND = 0;
+            ADC12MAX = 0;
+            ADC12CTL0 |= ADC12ENC;
+            ADC12CTL0 |= ADC12SC;
+        }
+        if (Button_Flag )
+        {
+            if(TB_C -TB_C_MAX){
+                Button_Flag = 0;
+                continue;
+            }
+            TA0CTL |= TACLR;
+            TB_C= 0;
+            Button_Flag = 0;
+            if (KeyCode >= '0' && KeyCode <= '9')
+            {
                 if (!input_status)
                 {
                     input_status = 1;
-                    GFX_SetPosition(7, 0);
                 }
                 input_buffer = input_buffer * 10 + KeyCode - 48;
                 current_position++;
-                GFX_Write(KeyCode);
-                break;
-            case '*':
-                if (input_status)
+            }
+            else
+            {
+                switch (KeyCode)
                 {
+                case '*'://Switch Cancel
+                    if (input_status)
+                    {
+                        input_status = 0;
+                        input_buffer = 0;
+                        current_position = 0;
+                        dot_enabled = 0;
+                        dot_position = 0;
+                    }
+                    else{
+                        if(Current_Select==Freqency){
+                            Current_Select = Current;
+                        }
+                        else{
+                            Current_Select = (CurrentSelect_PT)(Current_Select+ 1);
+                        }
+                    }
+                    break;
+                case '#'://Enter
+                    switch(Current_Select){
+                        case Current:
+                            settingCurrent = input_buffer / 1.1;
+                            break;//?????
+                        case Voltage:
+                            break;
+                        case Freqency:
+                            SPWM_Freq(input_buffer);
+                            break;
+                    }
                     input_status = 0;
                     input_buffer = 0;
                     current_position = 0;
                     dot_enabled = 0;
                     dot_position = 0;
-                    GFX_ClearRow(7);
-                }
-                else
-                {
-                    Current_Selected_isAmpl ^= 1;
-                    GFX_InvertRow_Ranged(2, 6 * 6, 127);
-                    GFX_InvertRow_Ranged(3, 6 * 6, 127);
-                };
-                break;
-            case '#':
-                if(Current_Selected_isAmpl && input_status && !dot_enabled){
-                    dot_enabled = true;
-                    dot_position = current_position;
-                    GFX_Write('.');
-                }
-                break;
-            case 'A':
-                changeWaveForm(SIN);
-                GFX_ClearRow(0);
-                GFX_WriteAt("A:Sin B:Squ C:Tri\n", 0, 0);
-                GFX_InvertRow_Ranged(0, 2 * 6, 5 * 6);
-                break;
-            case 'B':
-                changeWaveForm(SQUARE);
-                GFX_ClearRow(0);
-                GFX_WriteAt("A:Sin B:Squ C:Tri\n", 0, 0);
-                GFX_InvertRow_Ranged(0, 8 * 6, 11 * 6);
-                break;
-            case 'C':
-                changeWaveForm(TRIANGLE);
-                GFX_ClearRow(0);
-                GFX_WriteAt("A:Sin B:Squ C:Tri\n", 0, 0);
-                GFX_InvertRow_Ranged(0, 14 * 6, 17 * 6);
-                break;
-            case 'D':
-                if (Current_Selected_isAmpl)
-                {
-                    float input_result = 0;
-                    if (dot_position)
-                    {
-                        while (dot_position--)
-                        {
-                            input_result += input_buffer % 10;
-                            input_result /= 10;
-                            input_buffer /= 10;
-                        }
-                        input_result += input_buffer;
+                    break;
+                case 'A':
+                    switch(Current_Select){
+                        case Current:
+                            settingCurrent += 50;
+                            break;//?????
+                        case Voltage:
+                            break;//?????
+                        case Freqency:
+                            SPWM_Freq(Freq_Prec+1);
+                            break;
                     }
-                    else
-                    {
-                        input_result = input_buffer;
+                    break;
+                case 'B':
+                    switch(Current_Select){
+                        case Current:
+                            settingCurrent -= 50;
+                                break;//?????
+                        case Voltage:break;//?????
+                        case Freqency:
+                            SPWM_Freq(Freq_Prec-1);
+                            break;
                     }
-                    input_result *= 0.06103515625;
-                    if (input_result > 1 || input_buffer == 0)
-                    {
-                        break; //alert?
-                    }
-                    changeWaveForm(CurrentWave, freqency, input_result);
-                    GFX_ClearRow(3);
-                    GFX_WriteAt("Ampl: ", 3, 0);
-                    GFX_Write(input_result * 16.384);
-                    GFX_Write(" V");
-                    GFX_InvertRow_Ranged(3, 6 * 6, 127);
+                    break;
+                case 'C':
+                case 'D':
+                    break;
                 }
-                else
-                {
-                    if(input_buffer){
-                        changeWaveForm(CurrentWave, input_buffer, _ampl);
-                        bool kHz = false;
-                        float input_result = input_buffer;
-                        if (input_result >= 1000)
-                        {
-                            input_result /= 1000;
-                            kHz = 1;
-                        };
-                        GFX_ClearRow(2);
-                        GFX_WriteAt("Freq: ", 2, 0);
-                        GFX_Write(input_result);
-                        GFX_Write(kHz_Data[kHz]);
-                        GFX_InvertRow_Ranged(2, 6 * 6, 127);
-                    }
-                }
-                input_status = 0;
-                input_buffer = 0;
-                current_position = 0;
-                dot_enabled = 0;
-                dot_position = 0;
-                GFX_ClearRow(7);
-                break;
             }
-            Button_Flag = 0;
+            Update_UI();
         }
+        if(TA1CTL & TAIFG){
+            AVG_RP_COUNT += 1;
+        }
+        if (TA1CTL & TAIFG && GFX_Changed)
+        { //Display Client
+            TA1CTL &= ~TAIFG;
+            GFX_Changed = 0;
+            Nokia5110_Upload();
+        }
+    };
+}
+const char FullFill[7]="\xff\xff\xff\xff\xff\xff";
+void Update_UI(){
+    GFX_ClearRow_Ranged(1,6,72);
+    GFX_ClearRow_Ranged(3,6,78);
+    GFX_ClearRow_Ranged(4,52,72);
+    GFX_ClearRow(5);
+    GFX_WriteAt(RMS_I * 1000,1,6);
+    GFX_WriteAt(avg_v,3,6);
+    GFX_WriteAt(SPWM_GetFreq(),4,52);
+    switch(Current_Select){
+        case Current:
+            GFX_InvertRow_Ranged(1,6,72);
+            break;
+        case Voltage:
+            GFX_InvertRow_Ranged(3,6,78);
+            break;
+        case Freqency:
+            GFX_InvertRow_Ranged(4,52,72);
+            break;
     }
+    if(input_status){
+        GFX_WriteAt(input_buffer,5,0);  
+    }
+}
+
+#pragma vector = TIMER0_A1_VECTOR
+interrupt void TA0_ISR(){
+    TA0CTL &=~ TAIFG;
+    if(TB_C<TB_C_MAX){TB_C ++;};
+}
+#pragma vector = ADC12_VECTOR
+interrupt void ADC12_ISR()
+{
+    ADC12IFG &= ~BIT0;
+    if(ADC12MEM0 > ADC12MAX){
+        ADC12MAX = ADC12MEM0;
+    }
+}
+#pragma vector = DMA_VECTOR
+interrupt void DMA_ISR()
+{
+    DMA0CTL &= ~DMAIFG;
+    ADC12CTL0 &= ~ADC12ENC;
+    DMA_ISR_SEND = 1;
 }

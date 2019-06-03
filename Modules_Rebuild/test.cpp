@@ -1,11 +1,12 @@
 #ifdef __linux__
-#include "DAC7612U.h"
+#include "SPWM_int.h"
 #include <iostream>
 #include <fstream>
 using namespace std;
     
 int main()
 {
+    uint32_t freq_ = 50;
     bool generalTest;
     cin >> generalTest;
     if (!generalTest)
@@ -13,13 +14,12 @@ int main()
         ofstream fout("./result.dat", std::ios_base::out);
         int32_t data;
         fout << "data = [";
-        ChangeSqProp(1000,0.5); 
-        for (uint32_t i = 0; i < DMA1SZ; i+=2)
-        {
-            fout << *(uint16_t*)(DMA_SPI_Buffer + i) << ',';
+        for(uint64_t i = 0; i < freq / d_freq; i ++){
+            SPWM_ISR();
+            fout << TA2CCR2 << ",";
         }
         fout << ']' << endl;
-        fout << "DMA1SZ = " << (DMA1SZ + 1) / 2 << endl;
+        fout << "DMA1SZ = " << freq / d_freq<< endl;
     }
     else
     {

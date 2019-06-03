@@ -10,6 +10,7 @@
 #include "../TIDriver/ucs.h"
 #include "../profile.h"
 #include "MPY32.h"
+#define TIMER_A2_INUSE
 /*
     Using TimerA2,PWM at 40KHz , using 33MHz DCO.
     F5529   
@@ -18,8 +19,8 @@
     P2.4 -> PWM2 out
 */
 #define Mhz 1000000L
-#define Peroid 1024
-#define Peroid_10 10
+#define Peroid 550
+#define Peroid_10 5
 void InitPWM(uint16_t PWM1_Value = 0, uint16_t PWM2_Value = 0)
 {
     //Fucking 5529 has a 4MHz Osc
@@ -32,16 +33,19 @@ void InitPWM(uint16_t PWM1_Value = 0, uint16_t PWM2_Value = 0)
     P2DIR |= BIT5 | BIT4;
     P2DS |= BIT5 | BIT4;
     P5SEL |= BIT4 | BIT5 | BIT2 | BIT3;
-    burnDCO();
+    //burnDCO();
     UCS_initClockSignal(UCS_ACLK, UCS_DCOCLK_SELECT, UCS_CLOCK_DIVIDER_1);
     PWM_TAxCTL = TASSEL__ACLK + ID_0 + MC__STOP;
     PWM_TAxCCR0 = Peroid;
-    PWM_TAxCCTL0 = CM_1 + SCS + SCCI + CAP + CCIE;
-    PWM_TAxCCTL2 = CM_0 + SCS + PWM1MODE;
+
+#warning "PWM_Burn TimerA2CCR0 Interrupt disabled"
+    PWM_TAxCCTL0 = CM_1 + SCS + SCCI ;    //TA0.0捕获
+    PWM_TAxCCTL2 = CM_0 + SCS + PWM1MODE + OUT;
     PWM_TAxCCTL1 = CM_0 + SCS + PWM2MODE + OUT;
     PWM_TAxCCR1 = PWM2_Value;
     PWM_TAxCCR2 = PWM1_Value;
     PWM_TAxCTL |= MC__UP + TACLR;
+    __enable_interrupt();
 }
 
 inline void InitPWMPercent(uint16_t PWM1Value = 0, uint16_t PWM2Value = 0)
