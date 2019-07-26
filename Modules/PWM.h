@@ -85,10 +85,10 @@ void InitPWM(uint16_t PWM1_Value = 0, uint16_t PWM2_Value = 0)
 inline void InitPWMPercent(uint16_t PWM1Value = 0, uint16_t PWM2Value = 0)
 {
 #if EnablePercentOFF
-    return InitPWM((uint16_t)((PWM1Value + PWM_PercentOFF) * (double)Period / 100.0), (uint16_t)((PWM2Value+PWM_PercentOFF) * (double)Period / 100.0));
-    #else
+    return InitPWM((uint16_t)((PWM1Value + PWM_PercentOFF) * (double)Period / 100.0), (uint16_t)((PWM2Value + PWM_PercentOFF) * (double)Period / 100.0));
+#else
     return InitPWM((uint16_t)(PWM1Value * (double)Period / 100.0), (uint16_t)(PWM2Value * (double)Period / 100.0));
-    #endif
+#endif
 }
 inline void SetPWM1(uint16_t Value)
 {

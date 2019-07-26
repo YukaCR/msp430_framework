@@ -13,6 +13,7 @@ struct Point
 {
     uint8_t x, y;
 } CursorPosition = {0, 0};
+typedef Point Point_t;
 void GFX_SetupMemory(uint8_t *_GraphicsMemory, uint8_t _Width, uint8_t _Height)
 {
     GFXGraphicsMemory = _GraphicsMemory;
@@ -51,7 +52,7 @@ inline uint8_t *GetPositionPointer(uint16_t x, uint8_t y)
 {
     return GFXGraphicsMemory + y * Width + x;
 }
-inline uint8_t *GetPositionPointer(Point Position)
+inline uint8_t *GetPositionPointer(Point_t Position)
 {
     return GFXGraphicsMemory + (Position.y + 1) * Width + Position.x;
 }
@@ -177,24 +178,28 @@ void GFX_InvertRow(uint8_t Row)
         *GFX_D++ ^= 0xff;
     }
 }
-template <typename T>
-inline void GFX_Write(T data)
+template <typename T_t>
+inline void GFX_Write(T_t data)
 {
     return GFX_Write(to_string(data));
 }
-template <typename T>
-inline void GFX_WriteAt(T data, Point position)
+template <typename T_t>
+inline void GFX_WriteAt(T_t data, Point_t position)
 {
     GFX_SetPosition(position.y, position.x);
     GFX_CheckPosition();
     return GFX_Write(to_string(data));
 }
-template <typename T>
-inline void GFX_WriteAt(T data, uint8_t y, uint8_t x)
+template <typename T_t>
+inline void GFX_WriteAt(T_t data, uint8_t y, uint8_t x)
 {
     GFX_SetPosition(y, x);
     GFX_CheckPosition();
     return GFX_Write(to_string(data));
 }
-
+Point_t TemplatePoint;
+inline Point_t GFX_TextPosition(uint8_t y,uint8_t x){
+    *(uint16_t*)&TemplatePoint = ((((uint16_t)x*6)<<8)|y);
+    return TemplatePoint;
+}
 #endif

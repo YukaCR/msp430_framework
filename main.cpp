@@ -1,13 +1,15 @@
+#if 0
 #include <msp430.h>
 #include "vscode.h"
 #include "math.h"
 #include "Modules/PWM_Burn.h"
+#include "IQMath/QmathLib.h"
 #include "Modules_Rebuild/ADC_EV_DMA.h"
 #include "Modules_Rebuild/SPWM_int.h"
 #include "Modules_Rebuild/Nokia5110.h"
 #include "Modules/ButtonMartix.h"
 #define Cac 5
-
+#include "IQMath/QmathLib.h"
 //status regs
 uint32_t ADC_EV_x_Result = 0;
 uint16_t ADC_Count = 0;
@@ -61,18 +63,20 @@ uint16_t sc_ov = 20;
 float CurrentModulation = 1;
 int main()
 {
-    Setup_Nokia5110();
-    GFX_Fill(0x00);
+    //Setup_Nokia5110();
+    //GFX_Fill(0x00);
     Setup_SPWM();
     InitPWM();
-    ADC12_EV_init();
-    Setup_Button_Martix();
+    //ADC12_EV_init();
+    //Setup_Button_Martix();
     TA0CTL |= TAIE;
-    GFX_Write("Current\n            mAVoltage\n             VFreqency    Hz\n");
-    Update_UI();
+    //GFX_Write("Current\n            mAVoltage\n             VFreqency    Hz\n");
+    //Update_UI();
+    //_Q15imag(0xff,0xff);
     SPWM_Freq(50);
     while (1)
-    {
+    {};
+#if 0
         if (DMA_ISR_SEND) //EV Calaculation
         {
             float EV_Data = 0;
@@ -230,6 +234,7 @@ int main()
             Nokia5110_Upload();
         }
     };
+#endif
 }
 const char FullFill[7]="\xff\xff\xff\xff\xff\xff";
 void Update_UI(){
@@ -276,3 +281,98 @@ interrupt void DMA_ISR()
     ADC12CTL0 &= ~ADC12ENC;
     DMA_ISR_SEND = 1;
 }
+#endif 
+
+#if 0
+#include "vscode.h"
+#include "TIDriver/ucs.h"
+#include "Modules_Rebuild/Nokia5110.h"
+int main(){
+    uint8_t contra = 0;
+
+    UCS_initClockSignal(UCS_MCLK, UCS_DCOCLK_SELECT,UCS_CLOCK_DIVIDER_4);
+    UCS_initClockSignal(UCS_SMCLK, UCS_DCOCLK_SELECT, UCS_CLOCK_DIVIDER_1);
+    P2SEL |= BIT2;
+    P2DIR |= BIT2;
+    P2OUT |= BIT2;
+    UCSCTL2 = 0X016F;
+    UCSCTL1 = DCORSEL_7;
+    UCSCTL3 = SELREF__XT2CLK | FLLREFDIV_2;
+    UCSCTL0 = 0X1F << 5;
+    UCSCTL7 &=~ DCOFFG;
+
+    P2SEL |= BIT2 | BIT5 | BIT4;
+    P2DIR |= BIT5 | BIT4;
+    P2DS |= BIT3 + BIT4;
+    P5SEL |= BIT4 | BIT5 | BIT2 | BIT3;
+    TA0CTL = TASSEL__SMCLK | ID_0 | MC__STOP;
+    TA2CCR0 = 1536;
+    TA2CCR1 = 500;
+    TA2CCR2 = 1000;
+    TA2CCTL0 = CM_1 | SCS | SCCI | CAP;
+    TA2CCTL1 = CM_2 | SCS | OUTMOD_6;
+    TA2CCTL2 = CM_2 | SCS | OUTMOD_6;
+    TA2CTL |= MC__UP | TACLR;
+
+    while(1){
+    };
+}
+#endif
+#if 0
+#include "vscode.h"
+#include "DigitalPowerModules/DPM.h"
+int main(){
+    UCS_initClockSignal(UCS_MCLK, UCS_DCOCLK_SELECT,UCS_CLOCK_DIVIDER_4);
+    UCS_initClockSignal(UCS_SMCLK, UCS_DCOCLK_SELECT, UCS_CLOCK_DIVIDER_1);
+    P2SEL |= BIT2;
+    P2DIR |= BIT2;
+    P2OUT |= BIT2;
+    UCSCTL2 = 0X016F;
+    UCSCTL1 = DCORSEL_7;
+    UCSCTL3 = SELREF__XT2CLK | FLLREFDIV_2;
+    UCSCTL0 = 0X1F << 5;
+    UCSCTL7 &=~ DCOFFG;
+    DPM_Display_Init();
+    LCD_Clear(CYAN);
+    Display_Asc_String(0,0,5,(uint8_t*)"kksk", RED);
+    while(1){
+    }
+}
+#endif
+#if 0
+#include "vscode.h"
+#include "DigitalPowerModules/Modules/CS5463.H"
+// 13250, vrms
+int main(){
+    volatile _iq24 data;
+    volatile float result;
+    volatile float result_;
+    volatile uint32_t data_;
+    volatile uint32_t test2 = CS5463_MaxVoltage;
+    volatile uint32_t memory_map[32] = {0};
+    Setup_SPI_Master();
+    CS5463_Debug_Init();
+    data_ = CS5463_ReadVoltage_Gain();
+    while (1){
+        data = CS5463_Read_RMS_Voltage();
+        result = _IQ24toF(_IQ24mpy(_IQ24mpy(data,CS5463_MaxVoltage),CS5463_VoltageRMS__KPL));
+        result_ = _IQ24toF(data);
+        for(uint16_t i = 0; i < 32; i++){
+            memory_map[i] = CS5463_Read_Reg(i, CS5463_Page0);
+        }
+        __no_operation();
+        for(uint16_t i = 0; i < 32; i++){
+            CS5463_Write_Reg(i, CS5463_Page0,memory_map[i]);
+        }
+        __no_operation();
+    }
+    
+}
+#endif
+#if 1
+#include "vscode.h"
+#include <msp430.h>
+#include "math.h"
+#include "Modules/PWM_Burn.h"
+#include "Modules_Rebuild/SPWM_int.h"
+#endif

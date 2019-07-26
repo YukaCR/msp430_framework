@@ -11,7 +11,6 @@
 *   DMA2 used with OLED
 *   DMA0,DMA1 used with DAC_DDS
 */
-bool DMA0_IN_USE;
 #define CS_BIT BIT5
 #define LoadDACs_BIT BIT6
 #define STE_BIT BIT2
@@ -20,7 +19,6 @@ uint8_t P3PortData[2] = {GEN_SPI_PIN | CS_BIT | LoadDACs_BIT, GEN_SPI_PIN | STE_
 void SetupMPYTriger()
 {
   DMACTL0 |= DMA0TSEL_29;
-  DMA0_IN_USE = 1;
   DMACTL4 = DMARMWDIS; // Read-modify-write disable
   DMA0CTL &= ~DMAIFG;
   DMA0CTL = DMADT_4 + DMAEN + DMADSTINCR_3; // Rpt single tranfer, inc dst, Int

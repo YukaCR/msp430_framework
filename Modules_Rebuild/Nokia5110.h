@@ -4,6 +4,10 @@
 
 #warning "Nokia5110 uses Timer A1 as refresh Timer. Pay attention if some other modules use the Timer A1"
 
+#define P3_5_INUSE
+#define P3_6_INUSE
+#define P3_2_INUSE
+
 #define CS_Pin      BIT5
 #define DC_Pin      BIT6
 #define Reset_Pin   BIT2
@@ -16,7 +20,7 @@
 #define BIC_DC      P3OUT &=~ DC_Pin
 
 #define FPS 60
-#define Timer_Peroid 4000000 / FPS
+#define Timer_Peroid 48000000 / FPS
 #define splash 1
 
 uint8_t GraphicsMemory[6][84];
