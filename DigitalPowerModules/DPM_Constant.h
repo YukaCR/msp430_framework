@@ -31,9 +31,16 @@
 #define PerhenialEnable 0x01
 #define PerhenialDisable 0x00
 
+#define Normal OUTMOD_6
+#define Reverse OUTMOD_2
+
 #define TA2CLK      50000000 // 50 MHz
-#define DCOCLK      25000000 // 25 MHz
+#define DCOCLK      92600000 // 92.6 MHz
 #define XT1CLK         32768 // 32768 Hz
 #define XT2CLK       4000000 // 4  MHz
+
+#define MCLK        23150400 // 23.15 MHz
+#define SMCLK       92600000 // 92.6MHz
+#define ACLK         4000000 // 4MHz
 
 #endif

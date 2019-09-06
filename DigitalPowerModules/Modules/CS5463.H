@@ -14,9 +14,11 @@
 #define CS5463_CS_Clr  CS5463_CS_GPIO&=~CS5463_CS_Port
 
 
-#define CS5463_MaxCurrent _IQ24(5.0f)   
+#define CS5463_MaxCurrent _IQ24(5.0f)
 #define CS5463_MaxVoltage _IQ24(125.0f)
 #define CS5463_VoltageRMS__KPL  _IQ24( 1.0232220609579101 )
+#define CS5463_CurrentRMS__KPL  _IQ24( 1.0 )
+#define CS5463_CurrentRMS__BPL  0
 
 inline void CS5463_GPIO_Init(){
     P6SEL &=~ BIT3 | BIT4;

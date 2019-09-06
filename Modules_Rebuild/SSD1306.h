@@ -123,6 +123,7 @@ void Setup_SSD1306()
     UCB0IFG&=~UCTXIFG;
     UCB0CTL1 |= UCTXSTT;
           while(!UCB0IFG&UCTXIFG);
+          
     for(uint8_t i = 0; i < sizeof(oled_init_data);i ++){
         UCB0TXBUF  = *(uint8_t*)((uintptr_t)&oled_init_data + i);
         while(!(UCB0IFG&UCTXIFG));

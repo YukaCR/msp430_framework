@@ -35,6 +35,9 @@
 int _main();
 void setupDCO(void);
 void SetVCoreUp (unsigned int level);
+inline void Setup_Debug_Timer(){
+    TA0CTL = TASSEL__ACLK | ID_0 | MC__CONTINOUS;
+}
 int main(){
     __enable_interrupt();
     WDTCTL = WDTPW | WDTHOLD;

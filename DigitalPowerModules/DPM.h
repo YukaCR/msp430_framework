@@ -6,6 +6,7 @@
 #define DPM
 #pragma once
 #include "DPM_Constant.h"
+#include "DPM_int.h"
 // DPM configure
 #define DPM_Input_Buffer_Size 20
 
@@ -26,6 +27,9 @@
 #define DPM_Voltage_Sense_Coff 0.1
 #define DPM_Current_Sense_Coff 0.1
 
+#define DPM_PWMControl_PWM1_OUTMODE Normal
+#define DPM_PWMControl_PWM2_OUTMODE Normal
+
 
 // system headers 
 #include <msp430.h>
@@ -42,7 +46,7 @@
 
 // modules
 #include "../Modules/MPY32.h"               // for accelerate calculation
-
+typedef DPM_DATA_FORMAT DPM_DATA_t;
 // DPM system Modules
 /* List of DPM Modules
 *   DPM_Display             Display some important information such as current, voltage and power
@@ -53,7 +57,6 @@
 *   DPM_Method              Select which main power circuit you prefered
 *   DPM_PWMControl          Control the pwm output
 */
-#include "DPM_Display_TFT.h"
 /* 
 #include "DPM_Measure_BuiltinADC.h"
 #include "DPM_PWMControl_33MHz_33kHz.h"
@@ -62,8 +65,6 @@
 #include "DPM_Feedback_PID.h"
 #include "DPM_Method_Buck.h"
 */
-
-typedef DPM_DATA_FORMAT DPM_DATA_t;
 
 /* DPM module setup functions */
 #ifdef DPM_Measure
@@ -104,8 +105,15 @@ extern bool DPM_Measure_End;
 // method for PWM Control
 #ifdef DPM_PWMControll
 extern void DPM_PWMC_Change_Freqency(DPM_DATA_t);
-extern void DPM_PWMC_Change_DutyCycle(uint16_t);
+extern void DPM_PWMC_Change_DutyCycle(DPM_DATA_t);
+extern void DPM_PWMC_Setup_PWMControl();
+extern void DPM_PWMC_Channel1_DutyCycle_Increase(DPM_DATA_t);
+extern void DPM_PWMC_Channel1_DutyCycle_Decrease(DPM_DATA_t);
+extern void DPM_PWMC_Channel2_DutyCycle_Increase(DPM_DATA_t);
+extern void DPM_PWMC_Channel2_DutyCycle_Decrease(DPM_DATA_t);
+
 extern DPM_DATA_t DPM_Current_Freqency;
+extern DPM_Current_DutyCycle_t DPM_Current_DutyCycle;
 #endif
 
 // method for feedback, data input, output
@@ -124,12 +132,28 @@ void DPM_Service_LOOP();
 
 void Setup_DPM();
 
-int dpm_main(){
-    
+inline int dpm_main(){
+    Setup_DPM();
     while(1){
-        
+        DPM_Service_LOOP();
     }
     return 0;
 }
 
+
+inline void Setup_DPM(){
+// Setup DPM Clock Resources.
+    UCS_initClockSignal(UCS_MCLK, UCS_DCOCLK_SELECT,UCS_CLOCK_DIVIDER_4);
+    UCS_initClockSignal(UCS_SMCLK, UCS_DCOCLK_SELECT, UCS_CLOCK_DIVIDER_1);
+    UCS_initClockSignal(UCS_ACLK, UCS_XT2CLK_SELECT, UCS_CLOCK_DIVIDER_1);
+    P2SEL |= BIT2;
+    P2DIR |= BIT2;
+    P2OUT |= BIT2;
+    UCSCTL2 = 0x017F;
+    UCSCTL1 = DCORSEL_7;
+    UCSCTL3 = SELREF__XT2CLK | FLLREFDIV_5;
+    UCSCTL0 = 0xff;
+    UCSCTL7 &=~ DCOFFG;
+    __delay_cycles(102400u);//1ms for reset
+}
 #endif

@@ -71,12 +71,12 @@ void Setup_SPWM(){
     while(i--){
         *(data_pwm_test + i)+=20;
     }
-    DMACTL0 |=DMA0TSEL__TA2CCR0;
+    DMACTL0 |= DMA0TSEL__TA2CCR0;
     DMACTL4 = DMARMWDIS; // Read-modify-write disable
     DMA0CTL &= ~DMAIFG;
     __data20_write_long((uintptr_t)&DMA0SA, (uintptr_t)data_pwm_test);
     __data20_write_long((uintptr_t)&DMA0DA, (uintptr_t)&TA2CCR2);
-    DMA0CTL = DMADT_4 + DMAEN + DMASRCINCR_3 + DMAIE; // Rpt single tranfer, inc dst, Int
+    DMA0CTL = DMADT_4 + DMAEN + DMASRCINCR_3 ; // Rpt single tranfer, inc dst, Int
     DMA0SZ = (sizeof(data_pwm_test)/sizeof(uint16_t)) - 2; // DMA0 size = 1
     i = 200;
     while(i--){
@@ -89,7 +89,6 @@ void Setup_SPWM(){
     __data20_write_long((uintptr_t)&DMA1DA, (uintptr_t)&TA2CCR1);
     DMA1CTL = DMADT_4 + DMAEN + DMASRCINCR_3 ; // Rpt single tranfer, inc dst, Int
     DMA1SZ = (sizeof(data_pwm_test)/sizeof(uint16_t)) - 2; // DMA0 size = 1
-
     SPWM_Freq(50);
 }
 #endif

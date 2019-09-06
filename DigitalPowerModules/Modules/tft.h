@@ -20,6 +20,23 @@ sbit CS2 = P3 ^ 6;
 #define Font_CS_GPIO	P3OUT
 #define Font_CS_Port	BIT2
 
+#define DMA1_IN_USE
+void LCD_DMA_Init(){
+	DMACTL0 |= DMA1TSEL__USCIA0TX;
+    DMACTL4 = DMARMWDIS;
+    __data20_write_long((uintptr_t)&DMA1DA, (uintptr_t)&UCA0TXBUF);
+}
+void LCD_GPIO_Init(){
+	P4SEL &=~ BIT2 | BIT1;
+	P4OUT |= BIT2 | BIT1;
+	P4DIR |= BIT2 | BIT1;
+	P4REN |= BIT2 | BIT1;
+	P3SEL &=~ BIT5 | BIT1;
+	P3OUT |= BIT5 | BIT1;
+	P3DIR |= BIT5 | BIT1;
+	P3REN |= BIT5 | BIT1;
+}
+
 #define OLED_RST_TFT_Set OLED_RST_GPIO |= OLED_RST_Port;
 #define OLED_RST_TFT_Clr OLED_RST_GPIO &=~ OLED_RST_Port;
 
@@ -42,7 +59,6 @@ sbit CS2 = P3 ^ 6;
 #define OLED_MODE 0
 #define SIZE 16
 #define Brightness 0xFF
-
 extern u16 BACK_COLOR, POINT_COLOR;
 void delay_ms(unsigned int ms);
 void LCD_Writ_Bus(u8 dat);
@@ -100,33 +116,33 @@ inline void delay_ms(unsigned int ms)
 		__delay_cycles(1000 * 25);
 	}
 }
-void LCD_Writ_Bus(u8 dat)
+inline void LCD_Writ_Bus(u8 dat)
 {
 	OLED_CS_Clr;
 	spi_send(dat);
 	OLED_CS_Set;
 }
 
-void LCD_WR_DATA8(u8 dat)
+inline void LCD_WR_DATA8(u8 dat)
 {
 	OLED_DC_Set;
 	LCD_Writ_Bus(dat);
 }
 
-void LCD_WR_DATA(u16 dat)
+inline void LCD_WR_DATA(u16 dat)
 {
 	OLED_DC_Set;
 	LCD_Writ_Bus(dat >> 8);
 	LCD_Writ_Bus(dat);
 }
 
-void LCD_WR_REG(u8 dat)
+inline void LCD_WR_REG(u8 dat)
 {
 	OLED_DC_Clr;
 	LCD_Writ_Bus(dat);
 }
 
-void LCD_Address_Set(u16 x1, u16 y1, u16 x2, u16 y2)
+inline void LCD_Address_Set(u16 x1, u16 y1, u16 x2, u16 y2)
 {
 	LCD_WR_REG(0x2a);
 	LCD_WR_DATA(x1);
@@ -139,6 +155,10 @@ void LCD_Address_Set(u16 x1, u16 y1, u16 x2, u16 y2)
 
 void Lcd_Init(void)
 {
+	Setup_SPI_Master();
+	SPI_SetCPOL_CPHA(false,false);
+	LCD_GPIO_Init();
+	LCD_DMA_Init();
 	OLED_RST_TFT_Clr;
 	delay_ms(20);
 	OLED_RST_TFT_Set;
@@ -222,17 +242,33 @@ void Lcd_Init(void)
 	LCD_WR_REG(0x29);
 }
 
-void LCD_Clear(u16 Color)
+void LCD_Clear(u16 unknown)// 40MHz SPI , 26.76ms
 {
-	u16 i, j;
-	LCD_Address_Set(0, 0, LCD_W - 1, LCD_H - 1);
-	for (i = 0; i < LCD_W; i++)
-	{
-		for (j = 0; j < LCD_H; j++)
-		{
-			LCD_WR_DATA(Color);
-		}
-	}
+	volatile uint8_t kpdata = unknown;// clear AS black;
+	LCD_Address_Set(0,0,239,239);
+	OLED_CS_Clr;
+    OLED_DC_Set;
+	UCA0IFG &=~ UCTXIFG;
+	__data20_write_long((uintptr_t)&DMA1SA, (uintptr_t)&kpdata);
+    DMA1CTL = DMAEN | DMASRCBYTE | DMADSTBYTE;
+	DMA1SZ = 2;
+	UCA0IFG |= UCTXIFG; 
+	while(!(DMA1CTL & DMAIFG));
+
+    LCD_Address_Set(0,0,239,239);
+    OLED_CS_Clr;
+    OLED_DC_Set;
+    DMA1SZ = 57600;
+    DMA1CTL = DMAEN | DMASRCBYTE | DMADSTBYTE;
+    UCA0IFG &=~ UCTXIFG;
+    UCA0IFG |= UCTXIFG;
+    while(!(DMA1CTL & DMAIFG));
+    DMA1SZ = 57600;
+    DMA1CTL = DMAEN | DMASRCBYTE | DMADSTBYTE;
+    UCA0IFG &=~ UCTXIFG;
+    UCA0IFG |= UCTXIFG;
+    while(!(DMA1CTL & DMAIFG));
+	OLED_CS_Set;
 }
 
 void LCD_DrawPoint(u16 x, u16 y, u16 color)
