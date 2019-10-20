@@ -1,3 +1,9 @@
+/*
+*   Author: YukaCR
+*   DMA SPI for highspeed spi device(tft screen, dds) and repeated buffer transfer operations
+*   used with dds, nokia5110, ssd1306, tft.
+*   maxium speed is 45MHz(dco 99MHz, smclk div2).
+*/
 #ifndef DMA_SPI_H
 #define DMA_SPI_H
 #define ENABLE_DDS

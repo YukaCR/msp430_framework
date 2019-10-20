@@ -1,3 +1,8 @@
+/*
+*   Author: YukaCR
+*   sukoi no DPM pwmc module at 92MHz.
+*   medium prescalar.(extractly high for msp430.)
+*/
 #include "DPM_PWMControl.h"
 #include "../Modules/MPY32.h"
 #include "../IQMath/IQmathLib.h"

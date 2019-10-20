@@ -1,4 +1,8 @@
-
+/*
+* Author: YukaCR
+* 12bit dds buffer generation.
+* can use up to 5kB ram. total ram of msp430f5529 is 8kb(without debug)/10kb.
+*/
 #include <msp430.h>
 #include "stdlib.h"
 #include "string.h"
@@ -87,7 +91,6 @@ void ChangeTriProp(uint32_t freq, float ampl)
         }
         else
         {
-
             while (i--)
             {
                 result = (uint16_t)((float)i * pargma);

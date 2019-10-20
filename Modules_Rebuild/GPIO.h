@@ -1,3 +1,4 @@
+// try to code like stm32. competely failed.
 #ifndef GPIO_H
 #define GPIO_H
 #include "msp430.h"

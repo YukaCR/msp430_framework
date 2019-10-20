@@ -1,3 +1,4 @@
+// try to find a way to utility timer. totally failed.
 /*#include "TIDriver/ucs.h"
 #include "msp430.h"
 #include "UCS.h"

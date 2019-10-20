@@ -1,3 +1,8 @@
+/*
+*   Author: YukaCR
+*   1602 I2C shield driver.
+*   all codes are test with msp430f5529.
+*/
 #include "usci_i2c_hw.h"
 #include "stdlib.h"
 #include "string.h"

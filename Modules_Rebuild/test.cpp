@@ -1,3 +1,4 @@
+// for spwm generation.
 #ifdef __linux__
 #include "SPWM_int.h"
 #include <iostream>

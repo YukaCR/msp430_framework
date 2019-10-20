@@ -1,3 +1,4 @@
+// TLC5616 16bit dac driver.
 #ifndef __TLC5615_H__
 #define __TLC5615_H__
 #include "usci_a_spi.h"

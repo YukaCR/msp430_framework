@@ -1,3 +1,8 @@
+/*
+*   Author: YukaCR
+*   ssd1306 i2c with gfx.(lucky monster?)
+*   some time works.(push rst if not work.)
+*/  
 #ifndef SSD1673_H
 #define SSD1673_H
 #include "DMA_IIC.h"
@@ -122,8 +127,8 @@ void Setup_SSD1306()
     USCI_B_I2C_enable(UCBxBASE);
     UCB0IFG&=~UCTXIFG;
     UCB0CTL1 |= UCTXSTT;
-          while(!UCB0IFG&UCTXIFG);
-          
+    while(!UCB0IFG&UCTXIFG);
+    __delay_cycles(100);
     for(uint8_t i = 0; i < sizeof(oled_init_data);i ++){
         UCB0TXBUF  = *(uint8_t*)((uintptr_t)&oled_init_data + i);
         while(!(UCB0IFG&UCTXIFG));

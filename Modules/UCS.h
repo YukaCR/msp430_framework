@@ -1,4 +1,8 @@
-#if 0
+/*
+*	MSP430F5 / F2 clock initialize series code.(?
+*	use vscode.h instead.
+*/
+#if 0	
 #ifndef __MSP430__UCS__
 #define __MSP430__UCS__
 #include <msp430.h>

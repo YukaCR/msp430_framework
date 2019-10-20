@@ -1,10 +1,15 @@
-
+/*
+*   Author: YukaCR
+*   sukoi no ButtonMartix driver using interrupt.
+*   fully test with msp430f5529.
+*   maybe have some bugs.
+*/  
 #ifndef BUTTON_MARTIX_H
 #define BUTTON_MARTIX_H
 #include "../vscode.h"
 #include <msp430.h>
 /*薄膜键盘按键值对应:
- * 有字的一面对着芯片插入
+ * 有字的一面对着芯片插入 
  * '*':0   '0':1  '#':2  'D':3
  * '7':4   '8':5  '9':6  'C':7
  * '4':8   '5':9  '6':10 'B':11

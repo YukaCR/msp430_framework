@@ -1,3 +1,8 @@
+/*
+*   Author: YukaCR
+*   rebuild modules_rebuild/spi.h
+*   nothing special.
+*/
 #ifndef TFT
 #define TFT
 #include "../../vscode.h"

@@ -1,3 +1,8 @@
+/*
+*   Author: YukaCR
+*   INA260 SPI warpper for msp430.
+*   use stc8f2k60s2 as a protocol conversion intermediary.
+*/
 #include "vscode.h"
 #include "HW_SPI.h"
 volatile uint8_t INA260_Data[4];

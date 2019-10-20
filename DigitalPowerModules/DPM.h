@@ -1,4 +1,6 @@
 /*
+*   Author: YukaCR.
+*   sukoi no framework for digital power. all need is here!
 *   Digital power module, framework header.
 *   declare all of the functions and variables in this header.
 */
@@ -17,14 +19,14 @@
 #define GLOBAL_Q                12
 #define GLOBAL_IQ               24
 
-#define DPM_ADC_Reference_Voltage 3.27
+#define DPM_ADC_Reference_Voltage 2.477
 
 #define DPM_Input_Voltage  16.0
 #define DPM_Output_Voltage 12.0
 #define DPM_Output_Current 0.0
 #define DPM_Output_Power   0.0
 #define DPM_Output_Mode    DPM_Output_Mode_Voltage
-#define DPM_Voltage_Sense_Coff 0.1
+#define DPM_Voltage_Sense_Coff 1
 #define DPM_Current_Sense_Coff 0.1
 
 #define DPM_PWMControl_PWM1_OUTMODE Normal
@@ -143,7 +145,7 @@ inline int dpm_main(){
 
 inline void Setup_DPM(){
 // Setup DPM Clock Resources.
-    UCS_initClockSignal(UCS_MCLK, UCS_DCOCLK_SELECT,UCS_CLOCK_DIVIDER_4);
+    UCS_initClockSignal(UCS_MCLK, UCS_DCOCLK_SELECT,UCS_CLOCK_DIVIDER_8);   //12MHZ
     UCS_initClockSignal(UCS_SMCLK, UCS_DCOCLK_SELECT, UCS_CLOCK_DIVIDER_1);
     UCS_initClockSignal(UCS_ACLK, UCS_XT2CLK_SELECT, UCS_CLOCK_DIVIDER_1);
     P2SEL |= BIT2;

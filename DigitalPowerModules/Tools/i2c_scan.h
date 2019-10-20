@@ -1,4 +1,9 @@
-
+/*
+*   Author: YukaCR
+*   i2c address scan for msp430f5529.
+*   fuck some msp430f5529 chip won't generate a I2C address signal after UCTXSTT was given
+*   if this code can't find your devices out try another msp430 dev board.
+*/
 #include "../../TIDriver/usci_b_i2c.h"
 #include "../../TIDriver/ucs.h"
 

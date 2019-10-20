@@ -1,3 +1,6 @@
+// simple hw I2C driver.
+// not recommand use the USCIBxI2C mode. 
+// you'd better use the software i2c because of the shit hw bug.
 #ifndef IIC_H
 #define IIC_H
 #include "msp430.h"

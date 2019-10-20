@@ -1,8 +1,12 @@
+/*
+*  Author: YukaCR
+*  Measure input voltage RMS value. 
+*/
 #ifndef ADC_EV_DMA
 #define ADC_EV_DMA
 #include "../Modules/adc_sch.h"
 void ADC12_EV_init()
-{
+{ 
     P6DIR |= BIT3+BIT2+BIT4+BIT0+BIT1;
     P6OUT |= BIT3+BIT2+BIT4+BIT0+BIT1;
     P6SEL |= BIT3+BIT2+BIT4+BIT0+BIT1;
@@ -13,9 +17,7 @@ void ADC12_EV_init()
     ADC12IE |= BIT0;
     ADC12CTL1 = ADC12SHP + ADC12CONSEQ_2;
     ADC12MCTL0 = ADC12SREF_0 + ADC12INCH_3;
-
     HW_MPY_16_16_S_SETUP;
-
     ADC12CTL0 |= ADC12ENC;
     ADC12CTL0 |= ADC12SC;
 }

@@ -1,3 +1,10 @@
+/*
+*   Author: YukaCR
+*   sukoi no tft font framework.
+*	after call all time is under transfer.
+*   also a great choice for other screens.
+*   132us per comicsans number character at 45MHz speed.
+*/
 #pragma once
 #include "fontlib/ComicSansNumber.h"
 #include "fontlib/special.h"
@@ -27,8 +34,8 @@ inline uint8_t fontlib_displayChar(const font_t& useFont, uint8_t index,uint8_t 
     UCA0TXBUF = 0x2c;
     UCA0IFG = 0x00;
     OLED_DC_Set;
-    // Fast sending data;
 #if !defined(TFT_DO_NOT_USE_DMA_AFTER_INITILIZE)
+    // Fast speed sending data;
     __data20_write_long((uintptr_t)&DMA1SA, (uintptr_t)(*(uint32_t*)((uint16_t)useFont.font_index + (index << 2))));//52mclk
     __data20_write_long((uintptr_t)&DMA1DA, (uintptr_t)&UCA0TXBUF);//14mclk
     DMA1SZ = useFont.font_size;
@@ -37,6 +44,7 @@ inline uint8_t fontlib_displayChar(const font_t& useFont, uint8_t index,uint8_t 
 	while(!(DMA1CTL & DMAIFG));
     OLED_CS_Set;
 #else
+    // Low speed sending data;
     register uint16_t position = (uint16_t)useFont.font_index[index];   // flash usage below 32kb this will work.
     register uint16_t target = useFont.font_size + position;
     while(position!=target){

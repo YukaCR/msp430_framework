@@ -1,3 +1,7 @@
+/*
+*   Author: YukaCR
+*   fuck TIDriver will stuck at a point when i2c not connected or something wrong.
+*/
 #ifndef __I2C_H__
 #define __I2C_H__
 #ifdef VS_CODE

@@ -1,3 +1,8 @@
+/*
+*   Author: YukaCR
+*   oled 12864 driver rebuild in hwi2c.
+*   recommand use Modules_Rebuild/SSD1306.h instead
+*/
 #ifndef __OLED_H__
 #define __OLED_H__
 #include "usci_i2c_hw.h"

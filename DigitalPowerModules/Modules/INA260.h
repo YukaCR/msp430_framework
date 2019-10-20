@@ -1,3 +1,8 @@
+/*
+* Author: YukaCR
+* INA260 Power monitor.
+* totally failed dute to the shit hw bugs of msp430.
+*/
 #pragma once
 #include "../../vscode.h"
 #include "../../TIDriver/usci_b_i2c.h"

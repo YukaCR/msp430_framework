@@ -1,4 +1,8 @@
-#ifndef CS5463
+/*
+*   Author: YukaCR
+*   aka Modules_Rebuild/CS5463.h
+*/
+#if 0//#ifndef CS5463
 #define CS5463
 #include "vscode.h"
 #include "HW_SPI.h"

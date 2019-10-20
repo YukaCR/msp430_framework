@@ -1,3 +1,10 @@
+/*
+*   Author: YukaCR
+*   sukoi no pid calcualtion using hwmpu.
+*   181 mclk calculation cycle. 
+*   also show a way to decrease calcualtion time. 
+*   fully test with msp430f5529.
+*/
 #ifndef FP_PID_H
 #define FP_PID_H
 #include <msp430.h>
@@ -38,10 +45,10 @@ HW_MPY_32_16_S_SETUP;
 HW_MPY_32_16_S_END;
     PrevError = LastError;
     LastError = iError;
-    rec = RES3;
+    rec = RES3;             // rec = *(uint64_t*)RES3;
     rec = rec << 16 | RES2;
     rec = rec << 16 | RES1;
     rec = rec << 16 | RES0;
-    return rec>>24;
+    return rec>>24;         
 }
 #endif

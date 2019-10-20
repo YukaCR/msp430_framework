@@ -1,3 +1,7 @@
+/*
+*   Author: YukaCR
+*   aka DigitalPowerModules/dpm_pwmc_33Mhz_40kHz.h
+*/
 #ifdef PWM_RR_C
 #warning "PWM_Burn.h don't include another PWM.H if something wrong(x"
 #endif

@@ -1,3 +1,11 @@
+/*
+*   Author: YukaCR
+*   DAC7612U, 12bit 2Ch DAC, 1.25Msps
+*   just setup and set value. 
+*   can also use as DDS. takes one of three dma. be careful to use.
+*/
+
+
 #ifndef DAC7612U_H
 #define DAC7612U_H
 //max 10kHz, 500ksps, 50 dots.
@@ -7,6 +15,7 @@
 
 #include "DMA_SPI.h"
 #include "DDS.h"
+#include "SPI.h"
 void Setup_DAC7612U_DDS()
 {
     P6SEL &= ~BIT5;
@@ -15,8 +24,15 @@ void Setup_DAC7612U_DDS()
     setup_DMA_SPI();
     ChangeSinProp(1000, 1);
 }
+void Setup_DAC7612U()
+{
+    P6SEL &= ~BIT5;
+    P6DIR |= BIT5;
+    P6OUT |= BIT5;
+    Setup_SPI();
+}
 
-#if 0
+#if 1
 void DAC_Write(uint16_t value,uint16_t head){
     unsigned char send_data_0,send_data_1;
     value|=(head<<12);

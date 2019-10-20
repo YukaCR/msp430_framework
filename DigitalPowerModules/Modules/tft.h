@@ -1,3 +1,8 @@
+/*
+*	Author: YukaCR
+*	sukoi no TFT driver for msp430.
+*	self method for gfx without buffer.
+*/
 #pragma once
 #include "HW_SPI.h"
 /*

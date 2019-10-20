@@ -1,3 +1,8 @@
+/*
+*   Author: YukaCR
+*   sukoi no dpm pwmc spwm module
+*   maybe the best spwm generation module for msp430.
+*/
 #include "DPM_PWMControl.h"
 #include "../Modules/MPY32.h"
 #include "../IQMath/IQmathLib.h"

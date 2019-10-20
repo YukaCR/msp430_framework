@@ -1,3 +1,10 @@
+/*
+*   Author: YukaCR
+*   excellent compressed sin table with fast query speed.
+*   also have high resolution.
+*   used at dds and spwm generation
+*   use magical type hack and bit operation.
+*/
 #ifndef __linux__
 #include "msp430.h"
 #endif

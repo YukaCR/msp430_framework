@@ -1,6 +1,8 @@
 
 /*
+    Author: YukaCR
     MSB First SPI, Something interesting.
+    sukoi no hwspi driver
 */
 
 #ifndef __SPI_H__
@@ -22,8 +24,8 @@ void Setup_SPI(){
     //spi_param.clockPhase = USCI_A_SPI_PHASE_DATA_CHANGED_ONFIRST_CAPTURED_ON_NEXT;
     spi_param.clockPhase = USCI_A_SPI_PHASE_DATA_CAPTURED_ONFIRST_CHANGED_ON_NEXT;
     spi_param.clockPolarity = USCI_A_SPI_CLOCKPOLARITY_INACTIVITY_HIGH;
-    spi_param.clockSourceFrequency = 96000000;
-    spi_param.desiredSpiClock = 96000000;
+    spi_param.clockSourceFrequency = 4000000;
+    spi_param.desiredSpiClock = 4000000;
     USCI_A_SPI_initMaster(USCI_A0_BASE,&spi_param);
     USCI_A_SPI_enable(USCI_A0_BASE);
 };
@@ -33,7 +35,7 @@ uint8_t spi_send(uint8_t _data)
 	while (UCAxSTAT & UCBUSY);
 	return UCAxRXBUF;
 }
-uint16_t spi_send(uint16_t _data)
+uint16_t spi_send16(uint16_t _data)
 {
     uint16_t spi_result;
 	UCAxTXBUF = (_data>>8)&0xff; 
@@ -44,7 +46,7 @@ uint16_t spi_send(uint16_t _data)
     spi_result |= UCAxRXBUF;
 	return spi_result;
 }
-uint32_t spi_send(uint32_t _data)
+uint32_t spi_send32(uint32_t _data)
 {
     uint32_t spi_result;
 	UCAxTXBUF = (_data>>24)&0xff;
@@ -63,12 +65,12 @@ uint32_t spi_send(uint32_t _data)
 }
 inline void spi_send(uint8_t* data,uint16_t length,uint8_t* buffer = nullptr){
     while(length--){
-        UCAxTXBUF = *data; 
+        UCAxTXBUF = *(data++);
         while (UCAxSTAT & UCBUSY);
-        if(buffer){*data++ = UCAxTXBUF;}
+        if(buffer){*buffer++ = UCAxTXBUF;}
     }
 }
-inline void spi_send(uint16_t* data,uint16_t length){
+inline void spi_send16(uint16_t* data,uint16_t length){
     while(length--){
         UCAxTXBUF = *data >> 8&0xff; 
         while (UCAxSTAT & UCBUSY);

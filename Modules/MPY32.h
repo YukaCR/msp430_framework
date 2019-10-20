@@ -1,3 +1,8 @@
+/*
+*   Author: YukaCR
+*   sukoi no hwmpy initilaize serial and calculation.
+*   can also use dma to notify source. (?
+*/
 #ifndef MPY32_H
 #define MPY32_H
 #include <msp430.h>

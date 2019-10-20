@@ -1,6 +1,8 @@
 /*
-*   Freq+.H: Freq Measure Module using TimerAxCLK
-*   Up to 2Mhz 1%
+*   Author: YukaCR
+*   equal precision frequency measurement using TimerAxCLK.
+*   assume input sign as clock signal
+*   200Hz ~ 2Mhz 1%
 */
 
 #ifndef __Freq_Plus_H__

@@ -1,3 +1,4 @@
+// AD9833 function generator. translate from arduino.
 #ifndef AD9833_H
 /** \name AD9833 Control Register bit definitions
  * @{

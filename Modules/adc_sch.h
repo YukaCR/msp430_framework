@@ -1,3 +1,4 @@
+// ADC initilaize serial code.
 #ifndef __ADC_SCH_H__
 #define __ADC_SCH_H__
 #include <msp430.h>
@@ -14,7 +15,6 @@ bool ADC_SCH_Flag = 0;
 void ADC12_init()
 {
     P6DIR |= ADC12_SCH_PxBIT+BIT0+BIT2;
-    P6OUT |= ADC12_SCH_PxBIT+BIT0+BIT2;
     P6SEL |= ADC12_SCH_PxBIT+BIT0+BIT2;
     UCS_setExternalClockSource(32768, 4000000L);
     UCS_turnOnXT2(UCS_XT2_DRIVE_4MHZ_8MHZ);

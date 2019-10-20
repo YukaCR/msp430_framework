@@ -1,123 +1,65 @@
-#ifndef __VS_CODE__
-#define __VS_CODE_H__ // FORCE Disable DCOCLK, main do any thing startup
-#endif                // reverse some linting abilities
-
+#if 0
 #include "vscode.h"
-#include "DigitalPowerModules/DPM.h"
-#include "TIDriver/ucs.h"
-#include "Final/servo.h"
-
-// ACLK 32768 Hz
-// SMCLK 32768 Hz
-// MCLK 1MHz -> 32768 Hz
-
-inline void ServoRightInc()
-{
-    TA1CCR1 += 1;
-    if (TA1CCR1 > 25)
-    {
-        TA1CCR1 = 25;
-    }
+#include "Modules_Rebuild/SSD1306.h"
+int main(){
+    Setup_SSD1306();
+    SSD1306_Clear();
+    GFX_WriteAt("A:Sin B:Squ C:Tri\n", 0, 0);
+    GFX_Write("D:Enter #:. *:^Cancel\n");
+    GFX_Write("Freq: 1.0 kHz\n");
+    GFX_Write("Ampl: 16.384 V\n");
+    GFX_InvertRow_Ranged(0, 2 * 6, 5 * 6);
+    GFX_InvertRow_Ranged(2, 6 * 6, 127);
+    while(1);
 }
-inline void ServoLeftInc()
-{
-    TA1CCR1 -= 1;
-    if (TA1CCR1 < 5)
-    {
-        TA1CCR1 = 5;
-    }
-}
-
-uint16_t value =    20;
-int main()
-{
-    // 1MHz init.
-    WDTCTL = WDTPW | WDTHOLD;
-    // Subsystem clock init
-    UCS_initClockSignal(UCS_ACLK, UCS_VLOCLK_SELECT, UCS_CLOCK_DIVIDER_1);
-    UCS_initClockSignal(UCS_SMCLK, UCS_DCOCLK_SELECT, UCS_CLOCK_DIVIDER_1);
-    // Servo init
-    P2SEL |= BIT0;
-    P2DIR |= BIT0;
-    P1REN |= BIT5;
-    P1OUT |= BIT5;
-    TA1CTL = TASSEL__ACLK | ID__1 | MC__STOP;
-    TA1CCR0 = 100;
-    TA1CCR1 = 22; // Center value
-    TA1CCTL0 = CM_1 | SCS | SCCI;
-    TA1CCTL1 = CM_0 | SCS | OUTMOD_6;
-
-    P2SEL |= BIT5;
-    P2DIR |= BIT5;
-    P2REN |= BIT5 | BIT3;
-    P2OUT |= BIT5 | BIT3;
-    TA2CTL = TASSEL__SMCLK | ID__1 | MC__STOP;
-    TA2CCR0 = 100;
-    TA2CCR2 = 60; // Center value
-    TA2CCTL0 = CM_1 | SCS | SCCI;
-    TA2CCTL2 = CM_0 | SCS | OUTMOD_6;
-
-#if 0
-        // servo max:  82, min: 17, center: 49.
-        // servo limit: 30-150, 
-    TA1CCTL0 = CM_1 | SCS | SCCI;
-    TA1CCTL1 = CM_0 | SCS | OUTMOD_2;
-
-    // Setup sampling using TimerA2
-    TA2CTL = TASSEL__SMCLK | ID__1 | MC__STOP;
-    TA2CCR0 = 65;
-    TA2CCR2 = 55; 
-    TA2CCTL0 = CM_1 | SCS | SCCI;
-    TA2CCTL2 = CM_0 | SCS | OUTMOD_6;
-
-    // TA2 DMA
-    DMACTL0 |= DMA0TSEL__TA2CCR0;
-    DMA0CTL = DMADT_4 | DMADSTINCR_3 | DMASRCBYTE | DMADSTBYTE;
-    __data20_write_long(((uintptr_t)&DMA2SA, (uintptr_t)&P1IN);
-    __data20_write_long((uintptr_t)&DMA2DA, (uintptr_t)p1data);
-    DMA0SZ = 10;
 #endif
-    TA1CTL |= MC__UP;
-    TA2CTL |= MC__UP;
-    P2IE &= ~BIT3;
-    P1IE &= ~BIT5;
-
-    // nice data
-    while (1)
-    {
-        if (TA1CTL & TAIFG)
-        {
-            TA1CTL &= ~TAIFG;
-            if (!(P2IN & BIT3))
-            {
-                TA1CCR1 = value;
-            }
-            else if (!(P1IN & BIT5))
-            {
-                TA1CCR1 = value - 3;
-            }
-            else{
-
-            }
-        }
-    }
-    __bis_SR_register(CPUOFF);
+#if 1
+#include "vscode.h"
+#include "Modules_Rebuild/SSD1306_SPI.h"
+#include "Modules_Rebuild/Freq++.h"
+#include "Modules_Rebuild/to_string.h"
+#include "DigitalPowerModules/DPM_Measure_BuiltinADC.h"
+DPM_DATA_t DPM_Voltage_Max = 0;
+int main(){
+    char* resultStr;
+    volatile float adc_buffer;
+    volatile double result;
+    DPM_Setup_Voltage_Measure();
+    ADC12IE |= BIT1;
+    result = Setup_FreqPP();
+    ADC12IE &=~ BIT1;
+    Setup_SSD1306();
+    SSD1306_Fill(0X00);
+    resultStr = to_string(result, 10);
+    oled_write_string(resultStr,strlen(resultStr));
+    oled_write_char('\n');
+    adc_buffer = _Q12toF(DPM_Voltage_Max);
+    resultStr = to_string(adc_buffer, 10);
+    oled_write_string(resultStr, strlen(resultStr));
+    DMA0CTL = 0;
+    DMA1CTL = 0;
+    WDTCTL = 0XDEAD;
 }
-#if 0
-uint16_t i = 5000;
-#pragma vector = TIMER2_A1_VECTOR
-interrupt void TA2ISR(){
-    if(!i--){
-        uint8_t j = 700;
-        TA2CCR2 = TA2CCR0; 
-        while(j--){
-            TA2CTL &=~ TAIFG;
-            while (!TA2CTL&TAIFG);
-        }
-        i = 10000;
-        TA2CCR2 = 200; 
+#pragma vector = ADC12_VECTOR
+interrupt void ADC_ISR(){
+    DPM_Voltage_Detect();
+    if(DPM_Voltage > DPM_Voltage_Max){
+        DPM_Voltage_Max = DPM_Voltage;
     }
-    TA2CCR0 &=~ TAIFG;
+    ADC12IFG = 0x00;
 }
-
 #endif
+#if 0 // OLED Test
+int main(){
+    Setup_SSD1306();
+    SSD1306_Fill(0x00);
+    OLED_setXY(0,0);
+    oled_write_string("kOKoSuki.", 10);
+    LPM4;
+    while(1){
+        oled_write_char('a');
+        __delay_cycles(65534);
+    }
+    return 0;
+}
+#endif 

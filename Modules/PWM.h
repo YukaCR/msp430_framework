@@ -1,3 +1,8 @@
+/*
+*   Author: YukaCR
+*   aka DigitalPowerModules/dpm_pwmc_4Mhz_40kHz.h
+*   SPWM mode not test, recommand use DigitalPowerModules/dpm_pwmc_spwm.h
+*/
 #ifndef PWM_H
 #define PWM_H
 #define PWM_RR_C
@@ -41,7 +46,7 @@ uint16_t Period = (uint16_t)((double)12000000L / (double)PWMFreq);
 #endif
 #endif
 #endif
-#ifdef __MSP430F5529__
+#if defined( __MSP430F5529__) || defined( __MSP430F6638__)
 void InitPWM(uint16_t PWM1_Value = 0, uint16_t PWM2_Value = 0)
 {
     //Fucking 5529 has a 4MHz Osc

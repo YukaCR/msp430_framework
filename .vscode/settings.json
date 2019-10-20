@@ -1,6 +1,29 @@
 {
     "python.pythonPath": "/usr/bin/python3",
     "files.associations": {
-        "vector": "cpp"
-    }
+        "*.cu": "cpp, cu",
+        "*.cuh": "cpp",
+        "vector": "cpp",
+        "chrono": "cpp",
+        "istream": "cpp",
+        "optional": "cpp",
+        "ostream": "cpp",
+        "ratio": "cpp",
+        "system_error": "cpp",
+        "type_traits": "cpp",
+        "cstring": "cpp",
+        "map": "cpp",
+        "iosfwd": "cpp",
+        "iterator": "cpp",
+        "string": "cpp",
+        "__locale": "cpp",
+        "functional": "cpp"
+    },
+    "python.autoComplete.extraPaths": [
+        "/home/yukacr/.vscode/extensions/rt-thread.rt-thread-micropython-0.2.9/microExamples/code-completion"
+    ],
+    "python.linting.pylintArgs": [
+        "--init-hook",
+        "import sys; sys.path.append('/home/yukacr/.vscode/extensions/rt-thread.rt-thread-micropython-0.2.9/microExamples/code-completion')"
+    ]
 }

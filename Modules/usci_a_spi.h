@@ -1,5 +1,10 @@
 //USCI_A_API
-//#define __USCI_A_SPI_H__  // disable module
+//#define __USCI_A_SPI_H__  // disable module   
+/*
+*   Author: YukaCR
+*   USCIA SPI Driver
+*   recommand use Modules_Rebuild/SPI.H instead
+*/ 
 #ifndef __USCI_A_SPI_H__
 #define __USCI_A_SPI_H__
 #include <msp430.h>

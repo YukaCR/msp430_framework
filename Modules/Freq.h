@@ -1,7 +1,10 @@
 #if 1
 /*
+*	Author: YukaCR
+*   equal precision frequency measurement with callback function using external interrupt
+*	recommand use Modules_Rebuild/Freq++.h
 *	use P1_3 P2_3 as counter port
-*	1.698Mhz 1%
+*	100Hz ~ 1.698Mhz 1% when msp430 mclk at 33MHz.
 */
 #ifndef __FREQ_H__
 #define __FREQ_H__

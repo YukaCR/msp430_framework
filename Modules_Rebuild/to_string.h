@@ -1,3 +1,7 @@
+/*
+*   Author: YukaCR
+*   Native C++ warpper for Arduino Streaming.
+*/
 #ifndef TO_STRING_H
 #define TO_STRING_H
 #include "stdlib.h"

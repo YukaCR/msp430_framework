@@ -1,3 +1,6 @@
+/*
+    aka oled_hw_i2c.h
+*/
 #ifndef __OLED_H__
 #define __OLED_H__
 #include "usci_b_i2c.h"

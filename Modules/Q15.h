@@ -1,3 +1,7 @@
+/*
+*   Q series numbers type hack.
+*   recommand use IQMath/QMath.h instead
+*/
 #ifndef Q15_H
 #define Q15_H
 #include "msp430.h"

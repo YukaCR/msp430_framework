@@ -1,3 +1,9 @@
+/*
+* Author: YukaCR 
+* sukoi no spwm generation. 
+* recommand to use DPM SPWM instead(fix bugs, extractly fast when prop change.)
+* example: main_DELETE.cpp program 0.
+*/
 #ifndef SPWM_int
 #define SPWM_int
 #include "SinTable_SPWM.h"

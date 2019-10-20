@@ -1,3 +1,8 @@
+/*
+*   Author: YukaCR
+*   sukoi no 5110 driver with GFX DMA buffer.
+*   example: main_DELETE.cpp program 1.
+*/
 #include "DMA_SPI.h"
 #include "SPI.h"
 #include "TempGFX.h"

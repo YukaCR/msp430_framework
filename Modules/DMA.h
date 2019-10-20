@@ -1,3 +1,4 @@
+// msp430 dma initilaize serial code.
 #ifndef DMA_H
 #define DMA_H
 #include <msp430.h>

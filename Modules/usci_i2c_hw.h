@@ -1,3 +1,4 @@
+// i2c interrupt usage.
 #ifndef __I2C_HW_H__
 #define __I2C_HW_H__
 #include <msp430.h>

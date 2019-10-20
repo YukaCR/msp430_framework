@@ -1,4 +1,9 @@
-//DMA IIC For screens.
+/*
+*  Author: YukaCR 
+*  DMA IIC For screens.
+*  mainly use for ssd1306.
+*  example: Source/Task6.cpp 
+*/
 #include <msp430.h>
 #include <stdint.h>
 #include <string.h>

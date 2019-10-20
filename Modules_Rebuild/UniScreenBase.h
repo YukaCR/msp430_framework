@@ -1,3 +1,4 @@
+//try to find a way to drive screen. totally failed/
 #ifndef __USB_H__
 #define __USB_H__
 #include "stdint.h"

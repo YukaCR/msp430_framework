@@ -1,3 +1,4 @@
+// not test. ADS8588S 16bit 8Ch adc.
 #ifndef ADS8588_H
 #define ADS8588_H
 #include "../IQMath/QmathLib.h"

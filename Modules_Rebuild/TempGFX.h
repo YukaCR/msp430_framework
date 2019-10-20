@@ -1,3 +1,9 @@
+/*
+*   Author: YukaCR
+*   sukoi no GFX with buffer.
+*   example: main_DELETE.cpp program 0.
+*/
+
 #ifndef TempleGFX_h
 #define TempleGFX_h
 #include "../Modules/oledfont.h"

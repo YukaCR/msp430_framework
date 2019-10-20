@@ -1,4 +1,6 @@
+# Author: YukaCR
 .PHONY: all
+
 
 SOURCES = main.cpp\
 TIDriver/dma.cpp\
@@ -36,7 +38,7 @@ GCC = /home/yukacr/Workspace/ti-cgt-msp430_18.12.1.LTS/bin/cl430
 
 all: default
 default:
-	$(GCC) --define=__MSP430F5529__ $(FLAGS) $(INCLUDE) -ggdb --silicon_version=mspx $(SOURCES) -z -m Link_result.txt lnk_msp430f5529.cmd -o main.elf;
+	$(GCC) --define=__MSP430F5529__ $(FLAGS) $(INCLUDE) -ggdb --silicon_version=mspx $(SOURCES) -z -m Link_result.txt lnk_msp430F5529.cmd -o main.elf;
 lib:
 	rm *.obj
 	rm -rf Debug/obj/
@@ -45,7 +47,7 @@ lib:
 	mv *.obj Debug/obj
 	rm Debug/obj/ucs.obj
 upload:
-	$(GCC) --define=__MSP430F5529__  $(INCLUDE) -ggdb --silicon_version=mspx $(LIBRARIES) $(SOURCES) -z -m Link_result.txt lnk_msp430f5529.cmd -o main.elf;
+	$(GCC) --define=__MSP430F5529__  $(INCLUDE) -ggdb --silicon_version=mspx $(LIBRARIES) $(SOURCES) -z -m Link_result.txt lnk_msp430F5529.cmd -o main.elf;
 	mspdebug --allow-fw-update tilib "prog main.elf" gdb
 gfx:
-	$(GCC) --define=__MSP430F5529__ $(FLAGS) $(INCLUDE) -ggdb --silicon_version=mspx $(SOURCES) $(GFX) $(TIDriver) -z -m Link_result.txt lnk_msp430f5529.cmd -o main.elf;
+	$(GCC) --define=__MSP430F5529__ $(FLAGS) $(INCLUDE) -ggdb --silicon_version=mspx $(SOURCES) $(GFX) $(TIDriver) -z -m Link_result.txt lnk_msp430F5529.cmd -o main.elf;

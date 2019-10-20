@@ -1,7 +1,9 @@
 #!/usr/bin/python3
-from PIL import Image
+# Author: YukaCR
+# font framework generator
 # gimp 8bit grayscale , picture width = font width,
 # picture height = font height * font count
+from PIL import Image
 result = [] #for debug
 themeColor = int(input('ThemeColor(sa:0xffffff):'),16); 
 w = Image.open(input('Image path:'))

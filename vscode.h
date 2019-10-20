@@ -1,9 +1,14 @@
+/*
+*   visual studio code lint and intellisense.
+*   contains initialize serial code.
+*   also show a way to inject code before main function.
+*/
 #ifdef __VS_CODE__
 #ifndef __VS_CODE_H__
-#include <msp430.h>
-#define interrupt
-#define nullptr 0x00L
-#define __data20_write_long(x,y)
+  #include <msp430.h>
+  #define interrupt
+  #define nullptr 0x00L
+  #define __data20_write_long(x,y)
 #endif // !__VS_CODE_H__
 #endif // __VS_CODE__
 #ifndef __VS_CODE_H__
@@ -12,45 +17,32 @@
 #include "intrinsics.h"
 #include "TIDriver/ucs.h"
 #include <msp430f5xx_6xxgeneric.h>
-
-#define INT8_MAX                127
-#define INT16_MAX               32767
-#define INT32_MAX               2147483647L
-#define INT64_MAX               9223372036854775807LL
-
-/* Minimum of signed integral types.  */
-#define INT8_MIN                (-INT8_MAX - 1)
-#define INT16_MIN               (-INT16_MAX - 1)
-#define INT32_MIN               (-INT32_MAX - 1)
-#define INT64_MIN               (-INT64_MAX - 1)
-
-/* Maximum of unsigned integral types.  */
-#define UINT8_MAX               255U
-#define UINT16_MAX              65535U
-#define UINT32_MAX              4294967295UL
-#define UINT64_MAX              18446744073709551615ULL
-
 #define Mhz 1000000L
 #define XT1HFOFFG              (0x0004)       /* XT1 High Frequency Oscillator 1 Fault Flag */
 int _main();
 void setupDCO(void);
 void SetVCoreUp (unsigned int level);
-inline void Setup_Debug_Timer(){
-    TA0CTL = TASSEL__ACLK | ID_0 | MC__CONTINOUS;
+inline void Setup_Debug_Timer(){      // can be use to count 
+    TA0CTL = TASSEL__ACLK | ID_0 | MC__CONTINOUS | TACLR;
 }
-int main(){
+#define count_cycles(y, x) Start_Debug_Timer();\
+x;\
+y = TA0R;
+int main(){ // contain some import steps.
     __enable_interrupt();
     WDTCTL = WDTPW | WDTHOLD;
     setupDCO();
+    // burnDCO(); // fuck dco to 33MHz
     P5SEL |= BIT4 + BIT5+BIT2 + BIT3;
     UCS_setExternalClockSource(32768, 4*Mhz);
     UCS_turnOnXT2(UCS_XT2_DRIVE_4MHZ_8MHZ);
     UCS_turnOnLFXT1(UCS_XT1_DRIVE_0, UCS_XCAP_3);
     UCS_initClockSignal(UCS_SMCLK, UCS_XT2CLK_SELECT, UCS_CLOCK_DIVIDER_1);
     UCS_initClockSignal(UCS_ACLK, UCS_XT1CLK_SELECT, UCS_CLOCK_DIVIDER_1);
-    _main();
+    return _main();    // return to the real main function.
 }
 #define main() inline _main()
+// copy from ti resource center.
 void SetVCoreUp (unsigned int level)
 {
     // Open PMM registers for write access
@@ -91,7 +83,7 @@ void setupDCO(void)
       __bis_SR_register(SCG0);                  // Disable the FLL control loop
       UCSCTL0 = 0x0000u;                        // Set lowest possible DCOx, MODx
       UCSCTL1 = DCORSEL_6;                      // Set RSELx for DCO = 50 MHz
-      UCSCTL2 = 762u;                            // Set DCO Multiplier for 33.78MHz
+      UCSCTL2 = 609u; //762u                           // Set DCO Multiplier for 33.78MHz
                                                 // (N + 1) * FLLRef = Fdco
                                                 // (1023 + 1) * 32768 = 33.78MHz
       UCSCTL4 = SELA__REFOCLK | SELS__DCOCLK | SELM__DCOCLK;
@@ -127,8 +119,6 @@ void burnDCO(void)
 
 
       UCSCTL3 = SELREF__REFOCLK;    // select REFO as FLL source
-      UCSCTL6 = XT1OFF | XT2OFF;    // turn off XT1 and XT2
-
       /* Initialize DCO to 25.00MHz */
       __bis_SR_register(SCG0);                  // Disable the FLL control loop
       UCSCTL0 = 0x0000u;                        // Set lowest possible DCOx, MODx
